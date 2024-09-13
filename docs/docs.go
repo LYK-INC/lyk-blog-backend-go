@@ -126,8 +126,20 @@ const docTemplate = `{
         "homepage.Blog": {
             "type": "object",
             "properties": {
-                "author_id": {
+                "author_name": {
+                    "type": "string"
+                },
+                "author_profile_url": {
+                    "type": "string"
+                },
+                "blog_created_at": {
+                    "type": "string"
+                },
+                "blog_id": {
                     "type": "integer"
+                },
+                "blog_thumbnail_url": {
+                    "type": "string"
                 },
                 "category": {
                     "type": "array",
@@ -138,19 +150,15 @@ const docTemplate = `{
                 "content": {
                     "type": "string"
                 },
-                "created_at": {
+                "description": {
                     "type": "string"
                 },
-                "id": {
+                "read_time": {
                     "type": "integer"
-                },
-                "thumbnail_s3_path": {
-                    "type": "string"
                 },
                 "title": {
                     "type": "string"
-                },
-                "tsv_content": {}
+                }
             }
         },
         "types.ErrResponse": {

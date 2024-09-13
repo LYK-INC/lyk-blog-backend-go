@@ -31,31 +31,35 @@ type ArticlesResponse struct {
 	Data []Blog `json:"data"`
 }
 type Blog struct {
-	ID              int32       `json:"id"`
-	AuthorID        int32       `json:"author_id"`
-	Title           string      `json:"title"`
-	Content         string      `json:"content"`
-	TsvContent      interface{} `json:"tsv_content"`
-	ThumbnailS3Path string      `json:"thumbnail_s3_path"`
-	Category        []string    `json:"category"`
-	CreatedAt       time.Time   `json:"created_at"`
+	BlogID           int32     `json:"blog_id"`
+	Title            string    `json:"title"`
+	Content          string    `json:"content"`
+	BlogThumbnailUrl string    `json:"blog_thumbnail_url"`
+	Category         []string  `json:"category"`
+	Description      string    `json:"description"`
+	BlogCreatedAt    time.Time `json:"blog_created_at"`
+	AuthorName       string    `json:"author_name"`
+	ReadTime         int32     `json:"read_time"`
+	AuthorProfileUrl string    `json:"author_profile_url"`
 }
 
-func responseFmt(d []db.Blog) []Blog {
+func responseFmt(d []db.GetBlogsRow) []Blog {
 	// Create a slice of Blog to hold the formatted response
 	formattedResponse := make([]Blog, len(d))
 
-	// Loop through the db.Blog slice and map it to Blog
-	for i, blog := range d {
+	// Loop through the db.GetBlogsRow slice and map it to Blog
+	for i, b := range d {
 		formattedResponse[i] = Blog{
-			ID:              blog.ID,
-			AuthorID:        blog.AuthorID,
-			Title:           blog.Title,
-			Content:         blog.Content,
-			TsvContent:      blog.TsvContent,
-			ThumbnailS3Path: blog.ThumbnailS3Path,
-			Category:        blog.Category,
-			CreatedAt:       blog.CreatedAt.Time,
+			BlogID:           b.BlogID,
+			Title:            b.Title,
+			Content:          b.Content,
+			BlogThumbnailUrl: b.BlogThumbnailUrl,
+			Category:         b.Category,
+			Description:      b.Description,
+			BlogCreatedAt:    b.BlogCreatedAt.Time,
+			AuthorName:       b.AuthorName,
+			AuthorProfileUrl: b.AuthorProfileUrl,
+			ReadTime:         b.ReadTime,
 		}
 	}
 

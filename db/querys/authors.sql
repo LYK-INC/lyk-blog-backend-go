@@ -1,6 +1,6 @@
 -- name: CreateAuthor :one
-INSERT INTO authors (name, password_hash, role)
-VALUES ($1, $2, sqlc.arg(role)::TEXT[])
+INSERT INTO authors (name, password_hash, thumbnail_s3_path,role)
+VALUES ($1, $2, $3,sqlc.arg(role)::TEXT[])
 RETURNING id;
 
 -- name: UpdatePassword :exec

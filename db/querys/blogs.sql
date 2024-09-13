@@ -1,6 +1,14 @@
 -- name: CreateBlog :one
-INSERT INTO blogs (author_id, title, content, tsv_content, thumbnail_s3_path, category)
-VALUES ($1, $2, $3, to_tsvector($3), $4, sqlc.arg(category)::TEXT[])
+INSERT INTO blogs 
+    (author_id, 
+    title, 
+    content, 
+    tsv_content, 
+    thumbnail_s3_path, 
+    "description",
+    read_time,
+    category)
+VALUES ($1, $2, $3, to_tsvector($3), $4, $5, $6, sqlc.arg(category)::TEXT[])
 RETURNING id;
 
 
@@ -19,7 +27,22 @@ LIMIT $2 OFFSET $3;
 
 
 -- name: GetBlogs :many
-SELECT * 
-FROM blogs
-ORDER BY created_at DESC
-LIMIT $1 OFFSET $2;
+SELECT 
+    b.id AS blog_id,
+    b.title,
+    b.content,
+    b.thumbnail_s3_path AS blog_thumbnail_url,
+    b.category,
+    b.description,
+    b.read_time,
+    b.created_at AS blog_created_at,
+    a.name AS author_name,
+    a.thumbnail_s3_path AS author_profile_url
+FROM 
+    blogs b
+JOIN 
+    authors a ON b.author_id = a.id
+ORDER BY 
+    b.created_at DESC
+LIMIT 
+    $1 OFFSET $2;

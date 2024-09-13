@@ -9,20 +9,36 @@ import (
 )
 
 type Author struct {
-	ID           int32            `json:"id"`
-	Name         string           `json:"name"`
-	PasswordHash string           `json:"password_hash"`
-	Role         []string         `json:"role"`
-	CreatedAt    pgtype.Timestamp `json:"created_at"`
+	ID              int32            `json:"id"`
+	Name            string           `json:"name"`
+	PasswordHash    string           `json:"password_hash"`
+	Role            []string         `json:"role"`
+	ThumbnailS3Path string           `json:"thumbnail_s3_path"`
+	CreatedAt       pgtype.Timestamp `json:"created_at"`
 }
 
 type Blog struct {
 	ID              int32            `json:"id"`
 	AuthorID        int32            `json:"author_id"`
+	Description     string           `json:"description"`
 	Title           string           `json:"title"`
 	Content         string           `json:"content"`
+	ReadTime        int32            `json:"read_time"`
 	TsvContent      interface{}      `json:"tsv_content"`
 	ThumbnailS3Path string           `json:"thumbnail_s3_path"`
 	Category        []string         `json:"category"`
 	CreatedAt       pgtype.Timestamp `json:"created_at"`
+}
+
+type Press struct {
+	ID                      int32            `json:"id"`
+	PublisherName           string           `json:"publisher_name"`
+	PublisherProfileImgLink string           `json:"publisher_profile_img_link"`
+	ThumbnailS3Path         string           `json:"thumbnail_s3_path"`
+	Description             string           `json:"description"`
+	Title                   string           `json:"title"`
+	ExternalUrl             string           `json:"external_url"`
+	Category                []string         `json:"category"`
+	PublishedAt             pgtype.Timestamp `json:"published_at"`
+	CreatedAt               pgtype.Timestamp `json:"created_at"`
 }

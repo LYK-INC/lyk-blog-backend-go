@@ -27,19 +27,25 @@ func (q *Queries) AddRole(ctx context.Context, arg AddRoleParams) error {
 }
 
 const createAuthor = `-- name: CreateAuthor :one
-INSERT INTO authors (name, password_hash, role)
-VALUES ($1, $2, $3::TEXT[])
+INSERT INTO authors (name, password_hash, thumbnail_s3_path,role)
+VALUES ($1, $2, $3,$4::TEXT[])
 RETURNING id
 `
 
 type CreateAuthorParams struct {
-	Name         string   `json:"name"`
-	PasswordHash string   `json:"password_hash"`
-	Role         []string `json:"role"`
+	Name            string   `json:"name"`
+	PasswordHash    string   `json:"password_hash"`
+	ThumbnailS3Path string   `json:"thumbnail_s3_path"`
+	Role            []string `json:"role"`
 }
 
 func (q *Queries) CreateAuthor(ctx context.Context, arg CreateAuthorParams) (int32, error) {
-	row := q.db.QueryRow(ctx, createAuthor, arg.Name, arg.PasswordHash, arg.Role)
+	row := q.db.QueryRow(ctx, createAuthor,
+		arg.Name,
+		arg.PasswordHash,
+		arg.ThumbnailS3Path,
+		arg.Role,
+	)
 	var id int32
 	err := row.Scan(&id)
 	return id, err

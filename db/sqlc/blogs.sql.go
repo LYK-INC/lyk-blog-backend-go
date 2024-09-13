@@ -7,11 +7,21 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createBlog = `-- name: CreateBlog :one
-INSERT INTO blogs (author_id, title, content, tsv_content, thumbnail_s3_path, category)
-VALUES ($1, $2, $3, to_tsvector($3), $4, $5::TEXT[])
+INSERT INTO blogs 
+    (author_id, 
+    title, 
+    content, 
+    tsv_content, 
+    thumbnail_s3_path, 
+    "description",
+    read_time,
+    category)
+VALUES ($1, $2, $3, to_tsvector($3), $4, $5, $6, $7::TEXT[])
 RETURNING id
 `
 
@@ -20,6 +30,8 @@ type CreateBlogParams struct {
 	Title           string   `json:"title"`
 	Content         string   `json:"content"`
 	ThumbnailS3Path string   `json:"thumbnail_s3_path"`
+	Description     string   `json:"description"`
+	ReadTime        int32    `json:"read_time"`
 	Category        []string `json:"category"`
 }
 
@@ -29,6 +41,8 @@ func (q *Queries) CreateBlog(ctx context.Context, arg CreateBlogParams) (int32, 
 		arg.Title,
 		arg.Content,
 		arg.ThumbnailS3Path,
+		arg.Description,
+		arg.ReadTime,
 		arg.Category,
 	)
 	var id int32
@@ -37,7 +51,7 @@ func (q *Queries) CreateBlog(ctx context.Context, arg CreateBlogParams) (int32, 
 }
 
 const getBlogById = `-- name: GetBlogById :one
-SELECT id, author_id, title, content, tsv_content, thumbnail_s3_path, category, created_at 
+SELECT id, author_id, description, title, content, read_time, tsv_content, thumbnail_s3_path, category, created_at 
 FROM blogs
 WHERE id = $1
 `
@@ -48,8 +62,10 @@ func (q *Queries) GetBlogById(ctx context.Context, id int32) (Blog, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.AuthorID,
+		&i.Description,
 		&i.Title,
 		&i.Content,
+		&i.ReadTime,
 		&i.TsvContent,
 		&i.ThumbnailS3Path,
 		&i.Category,
@@ -59,7 +75,7 @@ func (q *Queries) GetBlogById(ctx context.Context, id int32) (Blog, error) {
 }
 
 const getBlogInCategory = `-- name: GetBlogInCategory :many
-SELECT id, author_id, title, content, tsv_content, thumbnail_s3_path, category, created_at 
+SELECT id, author_id, description, title, content, read_time, tsv_content, thumbnail_s3_path, category, created_at 
 FROM blogs
 WHERE $1 = ANY(category)
 ORDER BY created_at DESC
@@ -84,8 +100,10 @@ func (q *Queries) GetBlogInCategory(ctx context.Context, arg GetBlogInCategoryPa
 		if err := rows.Scan(
 			&i.ID,
 			&i.AuthorID,
+			&i.Description,
 			&i.Title,
 			&i.Content,
+			&i.ReadTime,
 			&i.TsvContent,
 			&i.ThumbnailS3Path,
 			&i.Category,
@@ -102,10 +120,25 @@ func (q *Queries) GetBlogInCategory(ctx context.Context, arg GetBlogInCategoryPa
 }
 
 const getBlogs = `-- name: GetBlogs :many
-SELECT id, author_id, title, content, tsv_content, thumbnail_s3_path, category, created_at 
-FROM blogs
-ORDER BY created_at DESC
-LIMIT $1 OFFSET $2
+SELECT 
+    b.id AS blog_id,
+    b.title,
+    b.content,
+    b.thumbnail_s3_path AS blog_thumbnail_url,
+    b.category,
+    b.description,
+    b.read_time,
+    b.created_at AS blog_created_at,
+    a.name AS author_name,
+    a.thumbnail_s3_path AS author_profile_url
+FROM 
+    blogs b
+JOIN 
+    authors a ON b.author_id = a.id
+ORDER BY 
+    b.created_at DESC
+LIMIT 
+    $1 OFFSET $2
 `
 
 type GetBlogsParams struct {
@@ -113,24 +146,39 @@ type GetBlogsParams struct {
 	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) GetBlogs(ctx context.Context, arg GetBlogsParams) ([]Blog, error) {
+type GetBlogsRow struct {
+	BlogID           int32            `json:"blog_id"`
+	Title            string           `json:"title"`
+	Content          string           `json:"content"`
+	BlogThumbnailUrl string           `json:"blog_thumbnail_url"`
+	Category         []string         `json:"category"`
+	Description      string           `json:"description"`
+	ReadTime         int32            `json:"read_time"`
+	BlogCreatedAt    pgtype.Timestamp `json:"blog_created_at"`
+	AuthorName       string           `json:"author_name"`
+	AuthorProfileUrl string           `json:"author_profile_url"`
+}
+
+func (q *Queries) GetBlogs(ctx context.Context, arg GetBlogsParams) ([]GetBlogsRow, error) {
 	rows, err := q.db.Query(ctx, getBlogs, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Blog{}
+	items := []GetBlogsRow{}
 	for rows.Next() {
-		var i Blog
+		var i GetBlogsRow
 		if err := rows.Scan(
-			&i.ID,
-			&i.AuthorID,
+			&i.BlogID,
 			&i.Title,
 			&i.Content,
-			&i.TsvContent,
-			&i.ThumbnailS3Path,
+			&i.BlogThumbnailUrl,
 			&i.Category,
-			&i.CreatedAt,
+			&i.Description,
+			&i.ReadTime,
+			&i.BlogCreatedAt,
+			&i.AuthorName,
+			&i.AuthorProfileUrl,
 		); err != nil {
 			return nil, err
 		}
