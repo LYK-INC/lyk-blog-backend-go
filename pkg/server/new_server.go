@@ -6,6 +6,7 @@ import (
 	"time"
 
 	db "github.com/LYK-INC/blog-backend-go/db/sqlc"
+	"github.com/LYK-INC/blog-backend-go/pkg/server/services/blog"
 	healthService "github.com/LYK-INC/blog-backend-go/pkg/server/services/health"
 	"github.com/LYK-INC/blog-backend-go/pkg/server/services/homepage"
 	"github.com/LYK-INC/blog-backend-go/utils/config"
@@ -21,6 +22,7 @@ import (
 type Services struct {
 	Health   *healthService.HealthService
 	HomePage *homepage.HomePageService
+	BlogPage *blog.BlogPageService
 }
 type Server struct {
 	config   config.Config
