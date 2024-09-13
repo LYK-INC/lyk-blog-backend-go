@@ -17,6 +17,10 @@ SELECT *
 FROM blogs
 WHERE id = $1;
 
+-- name: FeatureBlog :exec
+UPDATE blogs
+SET is_featured = true
+WHERE id =$1;
 
 -- name: GetBlogInCategory :many
 SELECT * 

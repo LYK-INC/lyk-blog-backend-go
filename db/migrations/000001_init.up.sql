@@ -22,6 +22,7 @@ CREATE TABLE "blogs" (
 
   "thumbnail_s3_path" VARCHAR(255) NOT NULL,
   "category" TEXT[] NOT NULL,
+  "is_featured" BOOLEAN NOT NULL DEFAULT FALSE,
 
   "created_at" timestamp NOT NULL DEFAULT NOW()
 );

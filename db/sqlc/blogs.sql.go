@@ -50,8 +50,19 @@ func (q *Queries) CreateBlog(ctx context.Context, arg CreateBlogParams) (int32, 
 	return id, err
 }
 
+const featureBlog = `-- name: FeatureBlog :exec
+UPDATE blogs
+SET is_featured = true
+WHERE id =$1
+`
+
+func (q *Queries) FeatureBlog(ctx context.Context, id int32) error {
+	_, err := q.db.Exec(ctx, featureBlog, id)
+	return err
+}
+
 const getBlogById = `-- name: GetBlogById :one
-SELECT id, author_id, description, title, content, read_time, tsv_content, thumbnail_s3_path, category, created_at 
+SELECT id, author_id, description, title, content, read_time, tsv_content, thumbnail_s3_path, category, is_featured, created_at 
 FROM blogs
 WHERE id = $1
 `
@@ -69,13 +80,14 @@ func (q *Queries) GetBlogById(ctx context.Context, id int32) (Blog, error) {
 		&i.TsvContent,
 		&i.ThumbnailS3Path,
 		&i.Category,
+		&i.IsFeatured,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getBlogInCategory = `-- name: GetBlogInCategory :many
-SELECT id, author_id, description, title, content, read_time, tsv_content, thumbnail_s3_path, category, created_at 
+SELECT id, author_id, description, title, content, read_time, tsv_content, thumbnail_s3_path, category, is_featured, created_at 
 FROM blogs
 WHERE $1 = ANY(category)
 ORDER BY created_at DESC
@@ -107,6 +119,7 @@ func (q *Queries) GetBlogInCategory(ctx context.Context, arg GetBlogInCategoryPa
 			&i.TsvContent,
 			&i.ThumbnailS3Path,
 			&i.Category,
+			&i.IsFeatured,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err

@@ -27,6 +27,7 @@ type Blog struct {
 	TsvContent      interface{}      `json:"tsv_content"`
 	ThumbnailS3Path string           `json:"thumbnail_s3_path"`
 	Category        []string         `json:"category"`
+	IsFeatured      bool             `json:"is_featured"`
 	CreatedAt       pgtype.Timestamp `json:"created_at"`
 }
 
