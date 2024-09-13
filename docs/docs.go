@@ -51,7 +51,7 @@ const docTemplate = `{
         },
         "/home/articles": {
             "get": {
-                "description": "returns server time",
+                "description": "returns array of articles",
                 "consumes": [
                     "application/json"
                 ],
@@ -59,9 +59,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Health"
+                    "Homepage"
                 ],
-                "summary": "Get Health check status",
+                "summary": "Get homepage articles",
                 "parameters": [
                     {
                         "maximum": 100,
@@ -85,6 +85,35 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/homepage.ArticlesResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/home/featured": {
+            "get": {
+                "description": "returns featured article",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Homepage"
+                ],
+                "summary": "Get featured article",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/homepage.FeaturedResponse"
                         }
                     },
                     "500": {
@@ -147,9 +176,6 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "content": {
-                    "type": "string"
-                },
                 "description": {
                     "type": "string"
                 },
@@ -157,6 +183,17 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "homepage.FeaturedResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/homepage.Blog"
+                },
+                "msg": {
                     "type": "string"
                 }
             }

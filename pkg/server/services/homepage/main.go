@@ -3,7 +3,6 @@ package homepage
 import (
 	"net/http"
 	"strconv"
-	"time"
 
 	db "github.com/LYK-INC/blog-backend-go/db/sqlc"
 	"github.com/LYK-INC/blog-backend-go/utils/config"
@@ -30,18 +29,6 @@ type ArticlesResponse struct {
 	Msg  string `json:"msg"`
 	Data []Blog `json:"data"`
 }
-type Blog struct {
-	BlogID           int32     `json:"blog_id"`
-	Title            string    `json:"title"`
-	Content          string    `json:"content"`
-	BlogThumbnailUrl string    `json:"blog_thumbnail_url"`
-	Category         []string  `json:"category"`
-	Description      string    `json:"description"`
-	BlogCreatedAt    time.Time `json:"blog_created_at"`
-	AuthorName       string    `json:"author_name"`
-	ReadTime         int32     `json:"read_time"`
-	AuthorProfileUrl string    `json:"author_profile_url"`
-}
 
 func responseFmt(d []db.GetBlogsRow) []Blog {
 	// Create a slice of Blog to hold the formatted response
@@ -52,7 +39,6 @@ func responseFmt(d []db.GetBlogsRow) []Blog {
 		formattedResponse[i] = Blog{
 			BlogID:           b.BlogID,
 			Title:            b.Title,
-			Content:          b.Content,
 			BlogThumbnailUrl: b.BlogThumbnailUrl,
 			Category:         b.Category,
 			Description:      b.Description,
@@ -66,9 +52,9 @@ func responseFmt(d []db.GetBlogsRow) []Blog {
 	return formattedResponse
 }
 
-// @tags			Health
-// @summary			Get Health check status
-// @description		returns server time
+// @tags			Homepage
+// @summary			Get homepage articles
+// @description		returns array of articles
 // @Param   		limit query	int	false	"int valid"	minimum(1)	maximum(100)
 // @Param   		skip query	int	false	"int valid"	minimum(0)	maximum(100)
 // @accept			json

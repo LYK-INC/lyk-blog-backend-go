@@ -32,13 +32,18 @@ definitions:
         items:
           type: string
         type: array
-      content:
-        type: string
       description:
         type: string
       read_time:
         type: integer
       title:
+        type: string
+    type: object
+  homepage.FeaturedResponse:
+    properties:
+      data:
+        $ref: '#/definitions/homepage.Blog'
+      msg:
         type: string
     type: object
   types.ErrResponse:
@@ -81,7 +86,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: returns server time
+      description: returns array of articles
       parameters:
       - description: int valid
         in: query
@@ -106,7 +111,26 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/types.ErrResponse'
-      summary: Get Health check status
+      summary: Get homepage articles
       tags:
-      - Health
+      - Homepage
+  /home/featured:
+    get:
+      consumes:
+      - application/json
+      description: returns featured article
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/homepage.FeaturedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrResponse'
+      summary: Get featured article
+      tags:
+      - Homepage
 swagger: "2.0"

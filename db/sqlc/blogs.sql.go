@@ -62,26 +62,51 @@ func (q *Queries) FeatureBlog(ctx context.Context, id int32) error {
 }
 
 const getBlogById = `-- name: GetBlogById :one
-SELECT id, author_id, description, title, content, read_time, tsv_content, thumbnail_s3_path, category, is_featured, created_at 
-FROM blogs
-WHERE id = $1
+SELECT 
+    b.id AS blog_id,
+    b.title,
+    b.content,
+    b.thumbnail_s3_path AS blog_thumbnail_url,
+    b.category,
+    b.description,
+    b.read_time,
+    b.created_at AS blog_created_at,
+    a.name AS author_name,
+    a.thumbnail_s3_path AS author_profile_url
+FROM 
+    blogs b
+JOIN 
+    authors a ON b.author_id = a.id
+WHERE b.id =$1
 `
 
-func (q *Queries) GetBlogById(ctx context.Context, id int32) (Blog, error) {
+type GetBlogByIdRow struct {
+	BlogID           int32            `json:"blog_id"`
+	Title            string           `json:"title"`
+	Content          string           `json:"content"`
+	BlogThumbnailUrl string           `json:"blog_thumbnail_url"`
+	Category         []string         `json:"category"`
+	Description      string           `json:"description"`
+	ReadTime         int32            `json:"read_time"`
+	BlogCreatedAt    pgtype.Timestamp `json:"blog_created_at"`
+	AuthorName       string           `json:"author_name"`
+	AuthorProfileUrl string           `json:"author_profile_url"`
+}
+
+func (q *Queries) GetBlogById(ctx context.Context, id int32) (GetBlogByIdRow, error) {
 	row := q.db.QueryRow(ctx, getBlogById, id)
-	var i Blog
+	var i GetBlogByIdRow
 	err := row.Scan(
-		&i.ID,
-		&i.AuthorID,
-		&i.Description,
+		&i.BlogID,
 		&i.Title,
 		&i.Content,
-		&i.ReadTime,
-		&i.TsvContent,
-		&i.ThumbnailS3Path,
+		&i.BlogThumbnailUrl,
 		&i.Category,
-		&i.IsFeatured,
-		&i.CreatedAt,
+		&i.Description,
+		&i.ReadTime,
+		&i.BlogCreatedAt,
+		&i.AuthorName,
+		&i.AuthorProfileUrl,
 	)
 	return i, err
 }
@@ -136,7 +161,6 @@ const getBlogs = `-- name: GetBlogs :many
 SELECT 
     b.id AS blog_id,
     b.title,
-    b.content,
     b.thumbnail_s3_path AS blog_thumbnail_url,
     b.category,
     b.description,
@@ -162,7 +186,6 @@ type GetBlogsParams struct {
 type GetBlogsRow struct {
 	BlogID           int32            `json:"blog_id"`
 	Title            string           `json:"title"`
-	Content          string           `json:"content"`
 	BlogThumbnailUrl string           `json:"blog_thumbnail_url"`
 	Category         []string         `json:"category"`
 	Description      string           `json:"description"`
@@ -184,7 +207,6 @@ func (q *Queries) GetBlogs(ctx context.Context, arg GetBlogsParams) ([]GetBlogsR
 		if err := rows.Scan(
 			&i.BlogID,
 			&i.Title,
-			&i.Content,
 			&i.BlogThumbnailUrl,
 			&i.Category,
 			&i.Description,
@@ -201,4 +223,54 @@ func (q *Queries) GetBlogs(ctx context.Context, arg GetBlogsParams) ([]GetBlogsR
 		return nil, err
 	}
 	return items, nil
+}
+
+const getFeaturedBlog = `-- name: GetFeaturedBlog :one
+SELECT 
+    b.id AS blog_id,
+    b.title,
+    b.content,
+    b.thumbnail_s3_path AS blog_thumbnail_url,
+    b.category,
+    b.description,
+    b.read_time,
+    b.created_at AS blog_created_at,
+    a.name AS author_name,
+    a.thumbnail_s3_path AS author_profile_url
+FROM 
+    blogs b
+JOIN 
+    authors a ON b.author_id = a.id
+WHERE b.is_featured = TRUE
+`
+
+type GetFeaturedBlogRow struct {
+	BlogID           int32            `json:"blog_id"`
+	Title            string           `json:"title"`
+	Content          string           `json:"content"`
+	BlogThumbnailUrl string           `json:"blog_thumbnail_url"`
+	Category         []string         `json:"category"`
+	Description      string           `json:"description"`
+	ReadTime         int32            `json:"read_time"`
+	BlogCreatedAt    pgtype.Timestamp `json:"blog_created_at"`
+	AuthorName       string           `json:"author_name"`
+	AuthorProfileUrl string           `json:"author_profile_url"`
+}
+
+func (q *Queries) GetFeaturedBlog(ctx context.Context) (GetFeaturedBlogRow, error) {
+	row := q.db.QueryRow(ctx, getFeaturedBlog)
+	var i GetFeaturedBlogRow
+	err := row.Scan(
+		&i.BlogID,
+		&i.Title,
+		&i.Content,
+		&i.BlogThumbnailUrl,
+		&i.Category,
+		&i.Description,
+		&i.ReadTime,
+		&i.BlogCreatedAt,
+		&i.AuthorName,
+		&i.AuthorProfileUrl,
+	)
+	return i, err
 }

@@ -13,14 +13,46 @@ RETURNING id;
 
 
 -- name: GetBlogById :one
-SELECT * 
-FROM blogs
-WHERE id = $1;
+SELECT 
+    b.id AS blog_id,
+    b.title,
+    b.content,
+    b.thumbnail_s3_path AS blog_thumbnail_url,
+    b.category,
+    b.description,
+    b.read_time,
+    b.created_at AS blog_created_at,
+    a.name AS author_name,
+    a.thumbnail_s3_path AS author_profile_url
+FROM 
+    blogs b
+JOIN 
+    authors a ON b.author_id = a.id
+WHERE b.id =$1;
+
 
 -- name: FeatureBlog :exec
 UPDATE blogs
 SET is_featured = true
 WHERE id =$1;
+
+-- name: GetFeaturedBlog :one
+SELECT 
+    b.id AS blog_id,
+    b.title,
+    b.content,
+    b.thumbnail_s3_path AS blog_thumbnail_url,
+    b.category,
+    b.description,
+    b.read_time,
+    b.created_at AS blog_created_at,
+    a.name AS author_name,
+    a.thumbnail_s3_path AS author_profile_url
+FROM 
+    blogs b
+JOIN 
+    authors a ON b.author_id = a.id
+WHERE b.is_featured = TRUE;
 
 -- name: GetBlogInCategory :many
 SELECT * 
@@ -34,7 +66,6 @@ LIMIT $2 OFFSET $3;
 SELECT 
     b.id AS blog_id,
     b.title,
-    b.content,
     b.thumbnail_s3_path AS blog_thumbnail_url,
     b.category,
     b.description,
