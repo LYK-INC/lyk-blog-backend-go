@@ -12,9 +12,13 @@ type Querier interface {
 	AddRole(ctx context.Context, arg AddRoleParams) error
 	CreateAuthor(ctx context.Context, arg CreateAuthorParams) (int32, error)
 	CreateBlog(ctx context.Context, arg CreateBlogParams) (int32, error)
+	CreatePress(ctx context.Context, arg CreatePressParams) (int32, error)
 	GetBlogById(ctx context.Context, id int32) (Blog, error)
 	GetBlogInCategory(ctx context.Context, arg GetBlogInCategoryParams) ([]Blog, error)
 	GetBlogs(ctx context.Context, arg GetBlogsParams) ([]GetBlogsRow, error)
+	GetPressById(ctx context.Context, id int32) (Press, error)
+	GetPressInCategory(ctx context.Context, arg GetPressInCategoryParams) ([]Press, error)
+	GetPresses(ctx context.Context, arg GetPressesParams) ([]GetPressesRow, error)
 	// Ensure role isn't already present
 	RemoveRole(ctx context.Context, arg RemoveRoleParams) error
 	UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error
