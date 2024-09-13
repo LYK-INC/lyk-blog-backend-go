@@ -46,6 +46,38 @@ definitions:
       msg:
         type: string
     type: object
+  homepage.Press:
+    properties:
+      category:
+        items:
+          type: string
+        type: array
+      description:
+        type: string
+      external_url:
+        type: string
+      press_id:
+        type: integer
+      press_published_at:
+        type: string
+      press_thumbnail_url:
+        type: string
+      publisher_name:
+        type: string
+      publisher_profile_img_link:
+        type: string
+      title:
+        type: string
+    type: object
+  homepage.PressResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/homepage.Press'
+        type: array
+      msg:
+        type: string
+    type: object
   types.ErrResponse:
     properties:
       err:
@@ -131,6 +163,38 @@ paths:
           schema:
             $ref: '#/definitions/types.ErrResponse'
       summary: Get featured article
+      tags:
+      - Homepage
+  /home/press:
+    get:
+      consumes:
+      - application/json
+      description: returns array of articles
+      parameters:
+      - description: int valid
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - description: int valid
+        in: query
+        maximum: 100
+        minimum: 0
+        name: skip
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/homepage.PressResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrResponse'
+      summary: Get Press articles
       tags:
       - Homepage
 swagger: "2.0"
