@@ -9,8 +9,11 @@ import (
 )
 
 type Querier interface {
-	DeleteAdminLoginById(ctx context.Context, adminID int32) error
-	GetAdminById(ctx context.Context, adminID int32) (Admin, error)
+	AddRole(ctx context.Context, arg AddRoleParams) error
+	CreateAuthor(ctx context.Context, arg CreateAuthorParams) (int32, error)
+	// Ensure role isn't already present
+	RemoveRole(ctx context.Context, arg RemoveRoleParams) error
+	UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error
 }
 
 var _ Querier = (*Queries)(nil)

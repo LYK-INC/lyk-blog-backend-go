@@ -8,9 +8,21 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Admin struct {
-	ID       int32       `json:"id"`
-	Email    pgtype.Text `json:"email"`
-	Password pgtype.Text `json:"password"`
-	Isdelete interface{} `json:"isdelete"`
+type Author struct {
+	ID           int32            `json:"id"`
+	Name         string           `json:"name"`
+	PasswordHash string           `json:"password_hash"`
+	Role         []string         `json:"role"`
+	CreatedAt    pgtype.Timestamp `json:"created_at"`
+}
+
+type Blog struct {
+	ID              int32            `json:"id"`
+	AuthorID        int32            `json:"author_id"`
+	Title           string           `json:"title"`
+	Content         string           `json:"content"`
+	TsvContent      interface{}      `json:"tsv_content"`
+	ThumbnailS3Path string           `json:"thumbnail_s3_path"`
+	Category        []string         `json:"category"`
+	CreatedAt       pgtype.Timestamp `json:"created_at"`
 }
