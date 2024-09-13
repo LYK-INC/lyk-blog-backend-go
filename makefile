@@ -11,7 +11,7 @@ check_required_dev_executables:
 	@ echo "All required executables ($(DEV_REQUIRED_EXECUTABLES)) are available in PATH."
 
 doc:
-	@ swag init -g ./main.go -o docs 
+	@ swag init -g ./cmd/server/main.go -o docs 
 
 
 # dev/local commands

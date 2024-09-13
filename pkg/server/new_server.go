@@ -5,20 +5,22 @@ import (
 	"strings"
 	"time"
 
+	db "github.com/LYK-INC/blog-backend-go/db/sqlc"
+	healthService "github.com/LYK-INC/blog-backend-go/pkg/server/services/health"
+	"github.com/LYK-INC/blog-backend-go/pkg/server/services/homepage"
+	"github.com/LYK-INC/blog-backend-go/utils/config"
+	util_validator "github.com/LYK-INC/blog-backend-go/utils/validator"
 	"github.com/go-playground/validator/v10"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
-	db "github.com/tetrex/golang-project-template/db/sqlc"
-	healthService "github.com/tetrex/golang-project-template/pkg/server/services/health"
-	"github.com/tetrex/golang-project-template/utils/config"
-	util_validator "github.com/tetrex/golang-project-template/utils/validator"
 	"golang.org/x/time/rate"
 )
 
 type Services struct {
-	Health *healthService.HealthService
+	Health   *healthService.HealthService
+	HomePage *homepage.HomePageService
 }
 type Server struct {
 	config   config.Config
@@ -114,7 +116,11 @@ func NewServer(c *ServerParams) (*Server, error) {
 	}
 
 	// services
-	services := initServices()
+	services := initServices(initServicesParams{
+		Config:  c.Config,
+		Logger:  c.Logger,
+		Queries: c.Queries,
+	})
 
 	// routes setup
 	initRoutes(router, services, c.Logger)

@@ -1,11 +1,10 @@
-module github.com/tetrex/golang-project-template
+module github.com/LYK-INC/blog-backend-go
 
 go 1.23.0
 
 require (
 	github.com/caarlos0/env/v11 v11.2.2
 	github.com/go-playground/validator/v10 v10.22.1
-	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/golang-migrate/migrate/v4 v4.18.1
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/labstack/echo/v4 v4.12.0

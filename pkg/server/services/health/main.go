@@ -10,8 +10,12 @@ import (
 type HealthService struct{}
 
 func NewHealthService() *HealthService {
-
 	return &HealthService{}
+}
+
+type HelloResponse struct {
+	Msg  string `json:"msg"`
+	Data int64  `json:"data"`
 }
 
 // @tags			Health
@@ -19,9 +23,9 @@ func NewHealthService() *HealthService {
 // @description		returns server time
 // @accept			json
 // @produce			json
-// @success			200	{object}	int64
-// @failure			500	{object}	utils.ErrorResponse
+// @success			200	{object}	HelloResponse
+// @failure			500	{object}	types.ErrResponse
 // @router			/ [get]
 func (s *HealthService) HealthCheck(c echo.Context) error {
-	return c.JSON(http.StatusOK, time.Now().UnixNano())
+	return c.JSON(http.StatusOK, HelloResponse{Msg: "api ok", Data: time.Now().UnixNano()})
 }
