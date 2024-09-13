@@ -98,7 +98,7 @@ func NewServer(c *ServerParams) (*Server, error) {
 	// cors
 	if c.Config.AppEnv != "local" {
 		router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-			AllowOrigins:     []string{"https://*.domain.com", "https://stage.domain.com"},
+			AllowOrigins:     []string{"https://*.lykstage.com", "https://blog.lykstage.com"},
 			AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodOptions},
 			AllowCredentials: true,
 			AllowHeaders:     []string{"application/json", "text/plain", "*/*"},
