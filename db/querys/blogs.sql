@@ -16,7 +16,6 @@ RETURNING id;
 SELECT 
     b.id AS blog_id,
     b.title,
-    b.content,
     b.thumbnail_s3_path AS blog_thumbnail_url,
     b.category,
     b.description,
@@ -30,6 +29,23 @@ JOIN
     authors a ON b.author_id = a.id
 WHERE b.id =$1;
 
+-- name: GetBlogByTitleSlug :one
+SELECT 
+    b.id AS blog_id,
+    b.title,
+    b.content,
+    b.thumbnail_s3_path AS blog_thumbnail_url,
+    b.category,
+    b.description,
+    b.read_time,
+    b.created_at AS blog_created_at,
+    a.name AS author_name,
+    a.thumbnail_s3_path AS author_profile_url
+FROM 
+    blogs b
+JOIN 
+    authors a ON b.author_id = a.id
+WHERE b.title =$1;
 
 -- name: FeatureBlog :exec
 UPDATE blogs

@@ -10,17 +10,17 @@ import (
 )
 
 type PressResponse struct {
-	Msg  string  `json:"msg"`
-	Data []Press `json:"data"`
+	Msg  string        `json:"msg"`
+	Data []types.Press `json:"data"`
 }
 
-func responsePressFmt(d []db.GetPressesRow) []Press {
+func responsePressFmt(d []db.GetPressesRow) []types.Press {
 	// Create a slice of Blog to hold the formatted response
-	formattedResponse := make([]Press, len(d))
+	formattedResponse := make([]types.Press, len(d))
 
 	// Loop through the db.GetPressesRow slice and map it to Blog
 	for i, b := range d {
-		formattedResponse[i] = Press{
+		formattedResponse[i] = types.Press{
 			PressID:                 b.PressID,
 			PublisherName:           b.PublisherName,
 			PublisherProfileImgLink: b.PublisherProfileImgLink,
@@ -37,7 +37,7 @@ func responsePressFmt(d []db.GetPressesRow) []Press {
 }
 
 // @tags			Homepage
-// @summary			Get Press articles
+// @summary			Get types.Press articles
 // @description		returns array of articles
 // @Param   		limit query	int	false	"int valid"	minimum(1)	maximum(100)
 // @Param   		skip query	int	false	"int valid"	minimum(0)	maximum(100)

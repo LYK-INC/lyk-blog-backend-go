@@ -10,17 +10,17 @@ import (
 )
 
 type ArticlesResponse struct {
-	Msg  string `json:"msg"`
-	Data []Blog `json:"data"`
+	Msg  string       `json:"msg"`
+	Data []types.Blog `json:"data"`
 }
 
-func responseFmt(d []db.GetBlogsRow) []Blog {
+func responseFmt(d []db.GetBlogsRow) []types.Blog {
 	// Create a slice of Blog to hold the formatted response
-	formattedResponse := make([]Blog, len(d))
+	formattedResponse := make([]types.Blog, len(d))
 
 	// Loop through the db.GetBlogsRow slice and map it to Blog
 	for i, b := range d {
-		formattedResponse[i] = Blog{
+		formattedResponse[i] = types.Blog{
 			BlogID:           b.BlogID,
 			Title:            b.Title,
 			BlogThumbnailUrl: b.BlogThumbnailUrl,

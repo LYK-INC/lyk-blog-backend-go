@@ -49,6 +49,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/blog/{blog_slug}": {
+            "get": {
+                "description": "returns Blog Data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Blog"
+                ],
+                "summary": "Get Blog By Slug",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Blog Slug",
+                        "name": "blog_slug",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/blog.BlogBySlug"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/home/articles": {
             "get": {
                 "description": "returns array of articles",
@@ -137,7 +175,7 @@ const docTemplate = `{
                 "tags": [
                     "Homepage"
                 ],
-                "summary": "Get Press articles",
+                "summary": "Get types.Press articles",
                 "parameters": [
                     {
                         "maximum": 100,
@@ -174,6 +212,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "blog.BlogBySlug": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/types.BlogWithContent"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
         "health.HelloResponse": {
             "type": "object",
             "properties": {
@@ -191,7 +240,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/homepage.Blog"
+                        "$ref": "#/definitions/types.Blog"
                     }
                 },
                 "msg": {
@@ -199,7 +248,32 @@ const docTemplate = `{
                 }
             }
         },
-        "homepage.Blog": {
+        "homepage.FeaturedResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/types.Blog"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "homepage.PressResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.Press"
+                    }
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.Blog": {
             "type": "object",
             "properties": {
                 "author_name": {
@@ -234,18 +308,56 @@ const docTemplate = `{
                 }
             }
         },
-        "homepage.FeaturedResponse": {
+        "types.BlogWithContent": {
             "type": "object",
             "properties": {
-                "data": {
-                    "$ref": "#/definitions/homepage.Blog"
+                "author_name": {
+                    "type": "string"
+                },
+                "author_profile_url": {
+                    "type": "string"
+                },
+                "blog_created_at": {
+                    "type": "string"
+                },
+                "blog_id": {
+                    "type": "integer"
+                },
+                "blog_thumbnail_url": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "content": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "read_time": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.ErrResponse": {
+            "type": "object",
+            "properties": {
+                "err": {
+                    "type": "string"
                 },
                 "msg": {
                     "type": "string"
                 }
             }
         },
-        "homepage.Press": {
+        "types.Press": {
             "type": "object",
             "properties": {
                 "category": {
@@ -276,31 +388,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "homepage.PressResponse": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/homepage.Press"
-                    }
-                },
-                "msg": {
-                    "type": "string"
-                }
-            }
-        },
-        "types.ErrResponse": {
-            "type": "object",
-            "properties": {
-                "err": {
-                    "type": "string"
-                },
-                "msg": {
                     "type": "string"
                 }
             }

@@ -1,5 +1,12 @@
 basePath: /
 definitions:
+  blog.BlogBySlug:
+    properties:
+      data:
+        $ref: '#/definitions/types.BlogWithContent'
+      msg:
+        type: string
+    type: object
   health.HelloResponse:
     properties:
       data:
@@ -11,12 +18,28 @@ definitions:
     properties:
       data:
         items:
-          $ref: '#/definitions/homepage.Blog'
+          $ref: '#/definitions/types.Blog'
         type: array
       msg:
         type: string
     type: object
-  homepage.Blog:
+  homepage.FeaturedResponse:
+    properties:
+      data:
+        $ref: '#/definitions/types.Blog'
+      msg:
+        type: string
+    type: object
+  homepage.PressResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/types.Press'
+        type: array
+      msg:
+        type: string
+    type: object
+  types.Blog:
     properties:
       author_name:
         type: string
@@ -39,14 +62,39 @@ definitions:
       title:
         type: string
     type: object
-  homepage.FeaturedResponse:
+  types.BlogWithContent:
     properties:
-      data:
-        $ref: '#/definitions/homepage.Blog'
+      author_name:
+        type: string
+      author_profile_url:
+        type: string
+      blog_created_at:
+        type: string
+      blog_id:
+        type: integer
+      blog_thumbnail_url:
+        type: string
+      category:
+        items:
+          type: string
+        type: array
+      content:
+        type: string
+      description:
+        type: string
+      read_time:
+        type: integer
+      title:
+        type: string
+    type: object
+  types.ErrResponse:
+    properties:
+      err:
+        type: string
       msg:
         type: string
     type: object
-  homepage.Press:
+  types.Press:
     properties:
       category:
         items:
@@ -67,22 +115,6 @@ definitions:
       publisher_profile_img_link:
         type: string
       title:
-        type: string
-    type: object
-  homepage.PressResponse:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/homepage.Press'
-        type: array
-      msg:
-        type: string
-    type: object
-  types.ErrResponse:
-    properties:
-      err:
-        type: string
-      msg:
         type: string
     type: object
 host: localhost:8000
@@ -114,6 +146,31 @@ paths:
       summary: Get Health check status
       tags:
       - Health
+  /blog/{blog_slug}:
+    get:
+      consumes:
+      - application/json
+      description: returns Blog Data
+      parameters:
+      - description: Blog Slug
+        in: path
+        name: blog_slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/blog.BlogBySlug'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrResponse'
+      summary: Get Blog By Slug
+      tags:
+      - Blog
   /home/articles:
     get:
       consumes:
@@ -194,7 +251,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/types.ErrResponse'
-      summary: Get Press articles
+      summary: Get types.Press articles
       tags:
       - Homepage
 swagger: "2.0"

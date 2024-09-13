@@ -9,12 +9,12 @@ import (
 )
 
 type FeaturedResponse struct {
-	Msg  string `json:"msg"`
-	Data Blog   `json:"data"`
+	Msg  string     `json:"msg"`
+	Data types.Blog `json:"data"`
 }
 
-func responseFeatured(d db.GetFeaturedBlogRow) Blog {
-	return Blog{
+func responseFeatured(d db.GetFeaturedBlogRow) types.Blog {
+	return types.Blog{
 		BlogID:           d.BlogID,
 		Title:            d.Title,
 		BlogThumbnailUrl: d.BlogThumbnailUrl,

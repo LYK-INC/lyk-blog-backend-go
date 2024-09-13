@@ -65,7 +65,6 @@ const getBlogById = `-- name: GetBlogById :one
 SELECT 
     b.id AS blog_id,
     b.title,
-    b.content,
     b.thumbnail_s3_path AS blog_thumbnail_url,
     b.category,
     b.description,
@@ -83,7 +82,6 @@ WHERE b.id =$1
 type GetBlogByIdRow struct {
 	BlogID           int32            `json:"blog_id"`
 	Title            string           `json:"title"`
-	Content          string           `json:"content"`
 	BlogThumbnailUrl string           `json:"blog_thumbnail_url"`
 	Category         []string         `json:"category"`
 	Description      string           `json:"description"`
@@ -96,6 +94,55 @@ type GetBlogByIdRow struct {
 func (q *Queries) GetBlogById(ctx context.Context, id int32) (GetBlogByIdRow, error) {
 	row := q.db.QueryRow(ctx, getBlogById, id)
 	var i GetBlogByIdRow
+	err := row.Scan(
+		&i.BlogID,
+		&i.Title,
+		&i.BlogThumbnailUrl,
+		&i.Category,
+		&i.Description,
+		&i.ReadTime,
+		&i.BlogCreatedAt,
+		&i.AuthorName,
+		&i.AuthorProfileUrl,
+	)
+	return i, err
+}
+
+const getBlogByTitleSlug = `-- name: GetBlogByTitleSlug :one
+SELECT 
+    b.id AS blog_id,
+    b.title,
+    b.content,
+    b.thumbnail_s3_path AS blog_thumbnail_url,
+    b.category,
+    b.description,
+    b.read_time,
+    b.created_at AS blog_created_at,
+    a.name AS author_name,
+    a.thumbnail_s3_path AS author_profile_url
+FROM 
+    blogs b
+JOIN 
+    authors a ON b.author_id = a.id
+WHERE b.title =$1
+`
+
+type GetBlogByTitleSlugRow struct {
+	BlogID           int32            `json:"blog_id"`
+	Title            string           `json:"title"`
+	Content          string           `json:"content"`
+	BlogThumbnailUrl string           `json:"blog_thumbnail_url"`
+	Category         []string         `json:"category"`
+	Description      string           `json:"description"`
+	ReadTime         int32            `json:"read_time"`
+	BlogCreatedAt    pgtype.Timestamp `json:"blog_created_at"`
+	AuthorName       string           `json:"author_name"`
+	AuthorProfileUrl string           `json:"author_profile_url"`
+}
+
+func (q *Queries) GetBlogByTitleSlug(ctx context.Context, title string) (GetBlogByTitleSlugRow, error) {
+	row := q.db.QueryRow(ctx, getBlogByTitleSlug, title)
+	var i GetBlogByTitleSlugRow
 	err := row.Scan(
 		&i.BlogID,
 		&i.Title,
