@@ -1,16 +1,27 @@
-FROM golang:alpine
+# Stage 1: Build the Go binary
+FROM golang:alpine AS builder
 
-
-# golang code
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 
-# air for hot reload
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ./blog_build ./cmd/server/main.go
+# Build the binary
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /build/blog_server ./cmd/server/main.go
 
-# for http server
+# Stage 2: Run the binary in a minimal container
+FROM alpine:latest
+
+WORKDIR /app
+
+# Copy the Go binary from the build stage
+COPY --from=builder /build/blog_server /app/blog_server
+
+# Make sure the binary is executable
+RUN chmod +x /app/blog_server
+
+# Expose the port for the HTTP server
 EXPOSE 80
 
-CMD ["./blog_build"]
+# Run the binary
+CMD ["/app/blog_server"]

@@ -74,4 +74,4 @@ tunnel_mysql:
 # dev/local commands
 prod_up:
 	@ git pull
-	@ docker compose -f ./docker/server/docker-compose-prod.yml up --build --remove-orphans
+	@ docker compose -f ./docker/server/docker-compose-prod.yml up --build --remove-orphans -d
