@@ -15,7 +15,7 @@ services:
         condition: service_healthy
     volumes:
       - ../../:/app
-      - /home/harsh/manhattan_data/ssl_cert:/ssl_cert
+      - /root/ssl_cert:/ssl_cert
     restart: unless-stopped
 
   blog_postgress:
