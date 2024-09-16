@@ -1,1 +1,4 @@
 tmp/*
+pg_data/*
+build/*
+.env.prod

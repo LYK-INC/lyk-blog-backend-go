@@ -67,3 +67,11 @@ tunnel_mongo:
 
 tunnel_mysql:
 	@ssh -i <path_to_ssh_pem_files> -L localhost:3306:localhost:3306 root@<remote_ip>
+
+
+
+# ---- PROD
+# dev/local commands
+prod_up:
+	@ git pull
+	@ docker compose -f ./docker/server/docker-compose-prod.yml up --build --remove-orphans
