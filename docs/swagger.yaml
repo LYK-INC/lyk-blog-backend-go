@@ -117,14 +117,14 @@ definitions:
       title:
         type: string
     type: object
-host: localhost:8000
+host: https://blogapi.lykstage.com
 info:
   contact:
-    name: github.com/tetrex
+    name: https://github.com/LYK-INC/blog-backend-go
   description: This is a backend api server
   license:
     name: MIT License
-  title: server api
+  title: blog server api
   version: "1.0"
 paths:
   /:

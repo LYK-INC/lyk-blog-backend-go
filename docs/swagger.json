@@ -2,16 +2,16 @@
     "swagger": "2.0",
     "info": {
         "description": "This is a backend api server",
-        "title": "server api",
+        "title": "blog server api",
         "contact": {
-            "name": "github.com/tetrex"
+            "name": "https://github.com/LYK-INC/blog-backend-go"
         },
         "license": {
             "name": "MIT License"
         },
         "version": "1.0"
     },
-    "host": "localhost:8000",
+    "host": "https://blogapi.lykstage.com",
     "basePath": "/",
     "paths": {
         "/": {

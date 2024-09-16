@@ -10,7 +10,7 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {
-            "name": "github.com/tetrex"
+            "name": "https://github.com/LYK-INC/blog-backend-go"
         },
         "license": {
             "name": "MIT License"
@@ -398,10 +398,10 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8000",
+	Host:             "https://blogapi.lykstage.com",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "server api",
+	Title:            "blog server api",
 	Description:      "This is a backend api server",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
