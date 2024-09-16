@@ -11,7 +11,7 @@
         },
         "version": "1.0"
     },
-    "host": "https://blogapi.lykstage.com",
+    "host": "blogapi.lykstage.com",
     "basePath": "/",
     "paths": {
         "/": {

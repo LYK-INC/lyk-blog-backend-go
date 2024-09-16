@@ -32,7 +32,7 @@ import (
 // @contact.name	https://github.com/LYK-INC/blog-backend-go
 // @license.name	MIT License
 //
-// @host			https://blogapi.lykstage.com
+// @host			blogapi.lykstage.com
 // @basePath		/
 func main() {
 	// load config
