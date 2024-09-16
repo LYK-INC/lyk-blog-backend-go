@@ -80,15 +80,35 @@ func main() {
 	switch config.AppEnv {
 	case "stage":
 	case "prod":
+		// go func() {
+		// 	// ---
+		// 	server_crt := "/ssl_cert/combined.crt"
+		// 	server_key := "/ssl_cert/star_lykstage_com.key"
+
+		// 	l.Log().Msgf("Starting server :: %d", 443)
+		// 	if err := router.StartTLS(
+		// 		fmt.Sprintf(":%d", 443), server_crt, server_key); err != nil && err != http.ErrServerClosed {
+		// 		l.Fatal().Err(err)
+		// 		l.Fatal().Err(errors.Errorf("Server startup failed"))
+		// 	}
+		// }()
+		_, b, _, _ := runtime.Caller(0)
+		root_path := filepath.Join(filepath.Dir(b), "../../")
+		m, err := migrate.New(
+			"file://"+filepath.Join(root_path, "db/migrations"),
+			config.PgxMigrationStr)
+		if err != nil {
+			l.Fatal().Err(err).Msg("Failed to create new migration")
+		}
+
+		if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+			l.Fatal().Err(err).Msg("Migration failed")
+		}
 		go func() {
 			// ---
-			server_crt := "/ssl_cert/combined.crt"
-			server_key := "/ssl_cert/star_lykstage_com.key"
-
-			l.Log().Msgf("Starting server :: %d", 443)
-			if err := router.StartTLS(
-				fmt.Sprintf(":%d", 443), server_crt, server_key); err != nil && err != http.ErrServerClosed {
-				l.Fatal().Err(err)
+			l.Info().Msgf("Starting server :: %d", 80)
+			if err := router.Start(
+				fmt.Sprintf(":%d", 80)); err != nil && err != http.ErrServerClosed {
 				l.Fatal().Err(errors.Errorf("Server startup failed"))
 			}
 		}()
