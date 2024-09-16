@@ -26,13 +26,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-// @title			server api
+// @title			blog server api
 // @version			1.0
 // @description		This is a backend api server
-// @contact.name	github.com/tetrex
+// @contact.name	https://github.com/LYK-INC/blog-backend-go
 // @license.name	MIT License
 //
-// @host			localhost:8000
+// @host			https://blogapi.lykstage.com
 // @basePath		/
 func main() {
 	// load config
@@ -80,18 +80,6 @@ func main() {
 	switch config.AppEnv {
 	case "stage":
 	case "prod":
-		// go func() {
-		// 	// ---
-		// 	server_crt := "/ssl_cert/combined.crt"
-		// 	server_key := "/ssl_cert/star_lykstage_com.key"
-
-		// 	l.Log().Msgf("Starting server :: %d", 443)
-		// 	if err := router.StartTLS(
-		// 		fmt.Sprintf(":%d", 443), server_crt, server_key); err != nil && err != http.ErrServerClosed {
-		// 		l.Fatal().Err(err)
-		// 		l.Fatal().Err(errors.Errorf("Server startup failed"))
-		// 	}
-		// }()
 		_, b, _, _ := runtime.Caller(0)
 		root_path := filepath.Join(filepath.Dir(b), "../../")
 		m, err := migrate.New(

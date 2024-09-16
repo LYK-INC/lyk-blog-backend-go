@@ -13,8 +13,6 @@ services:
     depends_on:
       blog_postgress:
         condition: service_healthy
-    volumes:
-      - /root/ssl_cert:/ssl_cert
     restart: unless-stopped
 
   blog_postgress:
