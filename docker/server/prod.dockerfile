@@ -15,7 +15,7 @@ FROM alpine:latest
 WORKDIR /app
 
 # Copy migration
-COPY --from=builder ./db /app/db
+COPY --from=builder /app/db /app/db
 
 # Copy the Go binary from the build stage
 COPY --from=builder /build/blog_server /app/blog_server
