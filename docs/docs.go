@@ -49,6 +49,60 @@ const docTemplate = `{
                 }
             }
         },
+        "/blog/related/{blog_id}": {
+            "get": {
+                "description": "returns Realted Blog Data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Blog"
+                ],
+                "summary": "Get Related Blog By Slug",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Blog Id",
+                        "name": "blog_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "int valid",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 0,
+                        "type": "integer",
+                        "description": "int valid",
+                        "name": "skip",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/blog.RealtedBLogsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/blog/{blog_slug}": {
             "get": {
                 "description": "returns Blog Data",
@@ -75,7 +129,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/blog.BlogBySlug"
+                            "$ref": "#/definitions/blog.GetBlogBySlugResponse"
                         }
                     },
                     "500": {
@@ -212,11 +266,25 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "blog.BlogBySlug": {
+        "blog.GetBlogBySlugResponse": {
             "type": "object",
             "properties": {
                 "data": {
                     "$ref": "#/definitions/types.BlogWithContent"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "blog.RealtedBLogsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.RealtedBlog"
+                    }
                 },
                 "msg": {
                     "type": "string"
@@ -385,6 +453,38 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "publisher_profile_img_link": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.RealtedBlog": {
+            "type": "object",
+            "properties": {
+                "author_name": {
+                    "type": "string"
+                },
+                "author_profile_url": {
+                    "type": "string"
+                },
+                "blog_created_at": {
+                    "type": "string"
+                },
+                "blog_id": {
+                    "type": "integer"
+                },
+                "blog_thumbnail_url": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "description": {
                     "type": "string"
                 },
                 "title": {

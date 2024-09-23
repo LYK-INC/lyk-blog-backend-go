@@ -17,6 +17,7 @@ func initRoutes(r *echo.Echo, s *Services, l *zerolog.Logger) {
 	h.GET("/press", s.HomePage.PressArticles)
 
 	b := r.Group("/blog")
-	b.GET("/:blog_slug", s.BlogPage.BlogBySlug)
+	b.GET("/:blog_slug", s.BlogPage.GetBlogBySlug)
+	b.GET("/related/:blog_id", s.BlogPage.GetRelatedBlogs)
 
 }

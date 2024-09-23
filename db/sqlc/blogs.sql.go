@@ -11,6 +11,21 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const checkBlogId = `-- name: CheckBlogId :one
+SELECT EXISTS (
+    SELECT 1
+    FROM blogs
+    WHERE id = $1
+)
+`
+
+func (q *Queries) CheckBlogId(ctx context.Context, id int32) (bool, error) {
+	row := q.db.QueryRow(ctx, checkBlogId, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createBlog = `-- name: CreateBlog :one
 INSERT INTO blogs 
     (author_id, 
@@ -320,4 +335,75 @@ func (q *Queries) GetFeaturedBlog(ctx context.Context) (GetFeaturedBlogRow, erro
 		&i.AuthorProfileUrl,
 	)
 	return i, err
+}
+
+const getRealatedBlogsById = `-- name: GetRealatedBlogsById :many
+SELECT  
+b.id,
+b.author_id,
+b.category,
+b.title,
+b.thumbnail_s3_path,
+b.description,
+b.created_at AS blog_created_at,
+a.name AS author_name,
+a.thumbnail_s3_path AS author_profile_url
+FROM blogs b
+JOIN authors a ON b.author_id = a.id
+WHERE b.id <> $3 -- Exclude the blog with the provided id
+  AND b.category && (
+    SELECT b2.category
+    FROM blogs b2
+    WHERE b2.id =$3
+  )
+LIMIT $1 
+OFFSET $2
+`
+
+type GetRealatedBlogsByIdParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+	ID     int32 `json:"id"`
+}
+
+type GetRealatedBlogsByIdRow struct {
+	ID               int32            `json:"id"`
+	AuthorID         int32            `json:"author_id"`
+	Category         []string         `json:"category"`
+	Title            string           `json:"title"`
+	ThumbnailS3Path  string           `json:"thumbnail_s3_path"`
+	Description      string           `json:"description"`
+	BlogCreatedAt    pgtype.Timestamp `json:"blog_created_at"`
+	AuthorName       string           `json:"author_name"`
+	AuthorProfileUrl string           `json:"author_profile_url"`
+}
+
+func (q *Queries) GetRealatedBlogsById(ctx context.Context, arg GetRealatedBlogsByIdParams) ([]GetRealatedBlogsByIdRow, error) {
+	rows, err := q.db.Query(ctx, getRealatedBlogsById, arg.Limit, arg.Offset, arg.ID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetRealatedBlogsByIdRow{}
+	for rows.Next() {
+		var i GetRealatedBlogsByIdRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.AuthorID,
+			&i.Category,
+			&i.Title,
+			&i.ThumbnailS3Path,
+			&i.Description,
+			&i.BlogCreatedAt,
+			&i.AuthorName,
+			&i.AuthorProfileUrl,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

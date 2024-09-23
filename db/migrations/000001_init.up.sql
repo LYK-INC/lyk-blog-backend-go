@@ -31,7 +31,7 @@ CREATE INDEX idx_blogs_content_tsv ON blogs USING GIN(tsv_content);
 
 CREATE OR REPLACE FUNCTION update_tsvector_column() RETURNS TRIGGER AS $$
 BEGIN
-  NEW.tsv_content := to_tsvector('english', NEW.content);
+  NEW.tsv_content := to_tsvector('english', NEW.content); -- 'markdown' was old
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

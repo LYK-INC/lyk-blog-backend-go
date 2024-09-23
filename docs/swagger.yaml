@@ -1,9 +1,18 @@
 basePath: /
 definitions:
-  blog.BlogBySlug:
+  blog.GetBlogBySlugResponse:
     properties:
       data:
         $ref: '#/definitions/types.BlogWithContent'
+      msg:
+        type: string
+    type: object
+  blog.RealtedBLogsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/types.RealtedBlog'
+        type: array
       msg:
         type: string
     type: object
@@ -117,6 +126,27 @@ definitions:
       title:
         type: string
     type: object
+  types.RealtedBlog:
+    properties:
+      author_name:
+        type: string
+      author_profile_url:
+        type: string
+      blog_created_at:
+        type: string
+      blog_id:
+        type: integer
+      blog_thumbnail_url:
+        type: string
+      category:
+        items:
+          type: string
+        type: array
+      description:
+        type: string
+      title:
+        type: string
+    type: object
 host: blogapi.lykstage.com
 info:
   contact:
@@ -163,12 +193,49 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/blog.BlogBySlug'
+            $ref: '#/definitions/blog.GetBlogBySlugResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/types.ErrResponse'
       summary: Get Blog By Slug
+      tags:
+      - Blog
+  /blog/related/{blog_id}:
+    get:
+      consumes:
+      - application/json
+      description: returns Realted Blog Data
+      parameters:
+      - description: Blog Id
+        in: path
+        name: blog_id
+        required: true
+        type: string
+      - description: int valid
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - description: int valid
+        in: query
+        maximum: 100
+        minimum: 0
+        name: skip
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/blog.RealtedBLogsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrResponse'
+      summary: Get Related Blog By Slug
       tags:
       - Blog
   /home/articles:

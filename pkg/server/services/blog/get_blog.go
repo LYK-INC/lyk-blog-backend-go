@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type BlogBySlug struct {
+type GetBlogBySlugResponse struct {
 	Msg  string                `json:"msg"`
 	Data types.BlogWithContent `json:"data"`
 }
@@ -35,10 +35,10 @@ func responseFeatured(d db.GetBlogByTitleSlugRow) types.BlogWithContent {
 // @Param 			blog_slug path string true "Blog Slug"
 // @accept			json
 // @produce			json
-// @success			200	{object}	BlogBySlug
+// @success			200	{object}	GetBlogBySlugResponse
 // @failure			500	{object}	types.ErrResponse
 // @router			/blog/{blog_slug} [get]
-func (s *BlogPageService) BlogBySlug(c echo.Context) error {
+func (s *BlogPageService) GetBlogBySlug(c echo.Context) error {
 	encloded_slug := c.Param("blog_slug")
 	// Decode the URL-encoded path parameter
 	decoded_slug, err := url.QueryUnescape(encloded_slug)
@@ -52,5 +52,5 @@ func (s *BlogPageService) BlogBySlug(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, types.ErrResponse{Msg: "bad paramaters", Err: err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, BlogBySlug{Msg: "blog data", Data: responseFeatured(r)})
+	return c.JSON(http.StatusOK, GetBlogBySlugResponse{Msg: "blog data", Data: responseFeatured(r)})
 }

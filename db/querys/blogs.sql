@@ -97,3 +97,34 @@ ORDER BY
     b.created_at DESC
 LIMIT 
     $1 OFFSET $2;
+
+
+-- name: GetRealatedBlogsById :many
+SELECT  
+b.id,
+b.author_id,
+b.category,
+b.title,
+b.thumbnail_s3_path,
+b.description,
+b.created_at AS blog_created_at,
+a.name AS author_name,
+a.thumbnail_s3_path AS author_profile_url
+FROM blogs b
+JOIN authors a ON b.author_id = a.id
+WHERE b.id <> $3 -- Exclude the blog with the provided id
+  AND b.category && (
+    SELECT b2.category
+    FROM blogs b2
+    WHERE b2.id =$3
+  )
+LIMIT $1 
+OFFSET $2;
+
+
+-- name: CheckBlogId :one  
+SELECT EXISTS (
+    SELECT 1
+    FROM blogs
+    WHERE id = $1
+);
