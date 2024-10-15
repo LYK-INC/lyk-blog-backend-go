@@ -88,6 +88,7 @@ SELECT
     b.read_time,
     b.created_at AS blog_created_at,
     a.name AS author_name,
+    b.is_featured as is_featured,
     a.thumbnail_s3_path AS author_profile_url
 FROM 
     blogs b

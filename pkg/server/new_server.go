@@ -6,6 +6,7 @@ import (
 	"time"
 
 	db "github.com/LYK-INC/blog-backend-go/db/sqlc"
+	adminService "github.com/LYK-INC/blog-backend-go/pkg/server/services/admin"
 	"github.com/LYK-INC/blog-backend-go/pkg/server/services/blog"
 	healthService "github.com/LYK-INC/blog-backend-go/pkg/server/services/health"
 	"github.com/LYK-INC/blog-backend-go/pkg/server/services/homepage"
@@ -20,9 +21,10 @@ import (
 )
 
 type Services struct {
-	Health   *healthService.HealthService
-	HomePage *homepage.HomePageService
-	BlogPage *blog.BlogPageService
+	Health       *healthService.HealthService
+	HomePage     *homepage.HomePageService
+	BlogPage     *blog.BlogPageService
+	AdminService *adminService.AdminPageService
 }
 type Server struct {
 	config   config.Config
@@ -62,22 +64,14 @@ func NewServer(c *ServerParams) (*Server, error) {
 	router := echo.New()
 	new_validator := validator.New()
 
-	// NOTE: custom validator
-	// if err := new_validator.RegisterValidation("env_validator", utils.EnvValidator); err != nil {
-	// 	fmt.Println("error in validator registration")
-	// 	log.Fatal(err)
-	// }
-
 	router.Validator = &util_validator.CustomValidator{Validator: new_validator}
 
-	// logger
 	router.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "time=${time_rfc3339_nano}, request_id=${id}, remote_ip=${remote_ip}, method=${method}, uri=${uri}, status=${status}, latency_nano=${latency}, bytes_in=${bytes_in}, bytes_out=${bytes_out}\n",
 	}))
 
-	// stack trace for debugging
 	router.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
-		StackSize: 1 << 10, // 1 KB
+		StackSize: 1 << 10,
 	}))
 
 	config := middleware.RateLimiterConfig{
@@ -99,7 +93,6 @@ func NewServer(c *ServerParams) (*Server, error) {
 
 	router.Use(middleware.RateLimiterWithConfig(config))
 
-	// cors
 	if c.Config.AppEnv != "local" {
 		router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowOrigins:     []string{"*"},
@@ -107,7 +100,6 @@ func NewServer(c *ServerParams) (*Server, error) {
 			AllowCredentials: true,
 			AllowHeaders:     []string{"application/json", "text/plain", "*/*"},
 			Skipper: func(c echo.Context) bool {
-				// if User-Agent is postman then skip
 				h := c.Request().Header.Get("User-Agent")
 				user_agent := strings.Split(h, "/")
 
@@ -117,14 +109,12 @@ func NewServer(c *ServerParams) (*Server, error) {
 		}))
 	}
 
-	// services
 	services := initServices(initServicesParams{
 		Config:  c.Config,
 		Logger:  c.Logger,
 		Queries: c.Queries,
 	})
 
-	// routes setup
 	initRoutes(router, services, c.Logger)
 
 	return &Server{
