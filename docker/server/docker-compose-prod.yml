@@ -1,9 +1,6 @@
 services:
   blog_server:
-    container_name: blog_server
-    build:
-      context: ../../
-      dockerfile: ./docker/server/prod.dockerfile
+    image: ghcr.io/lyk-inc/lyk-blog-backend-go-main:latest
     ports:
       - 8000:80
     env_file:
