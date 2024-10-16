@@ -29,7 +29,7 @@ func (q *Queries) AddRole(ctx context.Context, arg AddRoleParams) error {
 const createAuthor = `-- name: CreateAuthor :one
 INSERT INTO authors (name, password_hash, thumbnail_s3_path,role)
 VALUES ($1, $2, $3,$4::TEXT[])
-RETURNING id
+RETURNING id, name, password_hash
 `
 
 type CreateAuthorParams struct {
@@ -39,16 +39,45 @@ type CreateAuthorParams struct {
 	Role            []string `json:"role"`
 }
 
-func (q *Queries) CreateAuthor(ctx context.Context, arg CreateAuthorParams) (int32, error) {
+type CreateAuthorRow struct {
+	ID           int32  `json:"id"`
+	Name         string `json:"name"`
+	PasswordHash string `json:"password_hash"`
+}
+
+func (q *Queries) CreateAuthor(ctx context.Context, arg CreateAuthorParams) (CreateAuthorRow, error) {
 	row := q.db.QueryRow(ctx, createAuthor,
 		arg.Name,
 		arg.PasswordHash,
 		arg.ThumbnailS3Path,
 		arg.Role,
 	)
-	var id int32
-	err := row.Scan(&id)
-	return id, err
+	var i CreateAuthorRow
+	err := row.Scan(&i.ID, &i.Name, &i.PasswordHash)
+	return i, err
+}
+
+const getAuthorByUsernameAndPassword = `-- name: GetAuthorByUsernameAndPassword :one
+SELECT id, name, password_hash, role, thumbnail_s3_path, created_at FROM authors WHERE name = $1 AND password_hash = $2
+`
+
+type GetAuthorByUsernameAndPasswordParams struct {
+	Name         string `json:"name"`
+	PasswordHash string `json:"password_hash"`
+}
+
+func (q *Queries) GetAuthorByUsernameAndPassword(ctx context.Context, arg GetAuthorByUsernameAndPasswordParams) (Author, error) {
+	row := q.db.QueryRow(ctx, getAuthorByUsernameAndPassword, arg.Name, arg.PasswordHash)
+	var i Author
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.PasswordHash,
+		&i.Role,
+		&i.ThumbnailS3Path,
+		&i.CreatedAt,
+	)
+	return i, err
 }
 
 const getAuthors = `-- name: GetAuthors :many

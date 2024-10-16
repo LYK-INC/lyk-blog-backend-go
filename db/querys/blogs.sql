@@ -49,8 +49,10 @@ WHERE b.title =$1;
 
 -- name: FeatureBlog :exec
 UPDATE blogs
-SET is_featured = true
-WHERE id =$1;
+SET is_featured = CASE
+    WHEN id = $1 THEN true
+    ELSE false
+END;
 
 -- name: GetFeaturedBlog :one
 SELECT 
@@ -89,11 +91,14 @@ SELECT
     b.created_at AS blog_created_at,
     a.name AS author_name,
     b.is_featured as is_featured,
+    b.is_published as is_published,
     a.thumbnail_s3_path AS author_profile_url
 FROM 
     blogs b
 JOIN 
     authors a ON b.author_id = a.id
+WHERE 
+    b.is_deleted = false
 ORDER BY 
     b.created_at DESC
 LIMIT 
@@ -107,9 +112,12 @@ SELECT
     b.category,
     b.description,
     b.read_time,
+    b.is_published,
     b.created_at AS blog_created_at
 FROM
     blogs b
+WHERE 
+    b.is_deleted = false
 ORDER BY 
     b.created_at DESC
 LIMIT 
@@ -144,3 +152,13 @@ SELECT EXISTS (
     FROM blogs
     WHERE id = $1
 );
+
+-- name: SoftDeleteBlog :exec
+UPDATE blogs
+SET is_deleted = TRUE
+WHERE id = $1;
+
+-- name: PublishBlog :exec
+UPDATE blogs
+SET is_published = $2
+WHERE id = $1;

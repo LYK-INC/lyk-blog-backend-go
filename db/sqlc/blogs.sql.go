@@ -67,8 +67,10 @@ func (q *Queries) CreateBlog(ctx context.Context, arg CreateBlogParams) (int32, 
 
 const featureBlog = `-- name: FeatureBlog :exec
 UPDATE blogs
-SET is_featured = true
-WHERE id =$1
+SET is_featured = CASE
+    WHEN id = $1 THEN true
+    ELSE false
+END
 `
 
 func (q *Queries) FeatureBlog(ctx context.Context, id int32) error {
@@ -84,9 +86,12 @@ SELECT
     b.category,
     b.description,
     b.read_time,
+    b.is_published,
     b.created_at AS blog_created_at
 FROM
     blogs b
+WHERE 
+    b.is_deleted = false
 ORDER BY 
     b.created_at DESC
 LIMIT 
@@ -105,6 +110,7 @@ type GetAllBlogsRow struct {
 	Category         []string         `json:"category"`
 	Description      string           `json:"description"`
 	ReadTime         int32            `json:"read_time"`
+	IsPublished      bool             `json:"is_published"`
 	BlogCreatedAt    pgtype.Timestamp `json:"blog_created_at"`
 }
 
@@ -124,6 +130,7 @@ func (q *Queries) GetAllBlogs(ctx context.Context, arg GetAllBlogsParams) ([]Get
 			&i.Category,
 			&i.Description,
 			&i.ReadTime,
+			&i.IsPublished,
 			&i.BlogCreatedAt,
 		); err != nil {
 			return nil, err
@@ -234,7 +241,7 @@ func (q *Queries) GetBlogByTitleSlug(ctx context.Context, title string) (GetBlog
 }
 
 const getBlogInCategory = `-- name: GetBlogInCategory :many
-SELECT id, author_id, description, title, content, read_time, tsv_content, thumbnail_s3_path, category, is_featured, created_at 
+SELECT id, author_id, description, title, content, read_time, tsv_content, thumbnail_s3_path, category, is_featured, is_deleted, is_published, created_at 
 FROM blogs
 WHERE $1 = ANY(category)
 ORDER BY created_at DESC
@@ -267,6 +274,8 @@ func (q *Queries) GetBlogInCategory(ctx context.Context, arg GetBlogInCategoryPa
 			&i.ThumbnailS3Path,
 			&i.Category,
 			&i.IsFeatured,
+			&i.IsDeleted,
+			&i.IsPublished,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -290,11 +299,14 @@ SELECT
     b.created_at AS blog_created_at,
     a.name AS author_name,
     b.is_featured as is_featured,
+    b.is_published as is_published,
     a.thumbnail_s3_path AS author_profile_url
 FROM 
     blogs b
 JOIN 
     authors a ON b.author_id = a.id
+WHERE 
+    b.is_deleted = false
 ORDER BY 
     b.created_at DESC
 LIMIT 
@@ -316,6 +328,7 @@ type GetBlogsRow struct {
 	BlogCreatedAt    pgtype.Timestamp `json:"blog_created_at"`
 	AuthorName       string           `json:"author_name"`
 	IsFeatured       bool             `json:"is_featured"`
+	IsPublished      bool             `json:"is_published"`
 	AuthorProfileUrl string           `json:"author_profile_url"`
 }
 
@@ -338,6 +351,7 @@ func (q *Queries) GetBlogs(ctx context.Context, arg GetBlogsParams) ([]GetBlogsR
 			&i.BlogCreatedAt,
 			&i.AuthorName,
 			&i.IsFeatured,
+			&i.IsPublished,
 			&i.AuthorProfileUrl,
 		); err != nil {
 			return nil, err
@@ -469,4 +483,31 @@ func (q *Queries) GetRealatedBlogsById(ctx context.Context, arg GetRealatedBlogs
 		return nil, err
 	}
 	return items, nil
+}
+
+const publishBlog = `-- name: PublishBlog :exec
+UPDATE blogs
+SET is_published = $2
+WHERE id = $1
+`
+
+type PublishBlogParams struct {
+	ID          int32 `json:"id"`
+	IsPublished bool  `json:"is_published"`
+}
+
+func (q *Queries) PublishBlog(ctx context.Context, arg PublishBlogParams) error {
+	_, err := q.db.Exec(ctx, publishBlog, arg.ID, arg.IsPublished)
+	return err
+}
+
+const softDeleteBlog = `-- name: SoftDeleteBlog :exec
+UPDATE blogs
+SET is_deleted = TRUE
+WHERE id = $1
+`
+
+func (q *Queries) SoftDeleteBlog(ctx context.Context, id int32) error {
+	_, err := q.db.Exec(ctx, softDeleteBlog, id)
+	return err
 }

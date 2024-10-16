@@ -28,6 +28,8 @@ type Blog struct {
 	ThumbnailS3Path string           `json:"thumbnail_s3_path"`
 	Category        []string         `json:"category"`
 	IsFeatured      bool             `json:"is_featured"`
+	IsDeleted       bool             `json:"is_deleted"`
+	IsPublished     bool             `json:"is_published"`
 	CreatedAt       pgtype.Timestamp `json:"created_at"`
 }
 
@@ -38,6 +40,9 @@ type Press struct {
 	ThumbnailS3Path         string           `json:"thumbnail_s3_path"`
 	Description             string           `json:"description"`
 	Title                   string           `json:"title"`
+	IsDeleted               bool             `json:"is_deleted"`
+	IsPublished             bool             `json:"is_published"`
+	IsFeatured              bool             `json:"is_featured"`
 	ExternalUrl             string           `json:"external_url"`
 	Category                []string         `json:"category"`
 	PublishedAt             pgtype.Timestamp `json:"published_at"`

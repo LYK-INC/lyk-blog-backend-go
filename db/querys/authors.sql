@@ -1,7 +1,7 @@
 -- name: CreateAuthor :one
 INSERT INTO authors (name, password_hash, thumbnail_s3_path,role)
 VALUES ($1, $2, $3,sqlc.arg(role)::TEXT[])
-RETURNING id;
+RETURNING id, name, password_hash;
 
 -- name: UpdatePassword :exec
 UPDATE authors
@@ -21,3 +21,6 @@ WHERE id = $1;
 
 -- name: GetAuthors :many
 SELECT * FROM authors;
+
+-- name: GetAuthorByUsernameAndPassword :one
+SELECT * FROM authors WHERE name = $1 AND password_hash = $2;

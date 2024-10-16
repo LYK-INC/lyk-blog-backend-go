@@ -28,10 +28,20 @@ func initRoutes(r *echo.Echo, s *Services, l *zerolog.Logger) {
 	b.GET("/related/:blog_id", s.BlogPage.GetRelatedBlogs)
 
 	a := r.Group("/admin")
-	a.POST("/create-blog", s.AdminService.CreateBlogPage)
-	a.POST("/create-press", s.AdminService.CreatePressPage)
+	a.POST("/login", s.AdminService.LoginAuthReqHandler)
 	a.POST("/create-author", s.AdminService.CreateNewAuthor)
-	a.GET("/get-press", s.AdminService.GetAllPresses)
 	a.GET("/get-authors", s.AdminService.GetAllAuthors)
+
+	a.POST("/create-blog", s.AdminService.CreateBlogPage)
 	a.GET("/get-blog/:limit/:offset", s.AdminService.GetBlogPage)
+	a.GET("/get-blog-by-id/:blog_id", s.AdminService.GetBlogPageById)
+	a.PUT("/update-feature-blog/:blog_id", s.AdminService.UpdateFeatureBlog)
+	a.PUT("/publish-blog/:blog_id/:publish", s.AdminService.PublishBlog)
+	a.DELETE("/delete-blog/:blog_id", s.AdminService.DeleteBlog)
+
+	a.POST("/create-press", s.AdminService.CreatePressPage)
+	a.GET("/get-press", s.AdminService.GetAllPresses)
+	a.PUT("/update-feature-press/:press_id", s.AdminService.UpdateFeaturePress)
+	a.PUT("/publish-press/:press_id/:publish", s.AdminService.PublishPress)
+	a.DELETE("/delete-press/:press_id", s.AdminService.DeletePress)
 }

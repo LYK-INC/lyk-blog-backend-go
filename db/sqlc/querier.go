@@ -11,11 +11,14 @@ import (
 type Querier interface {
 	AddRole(ctx context.Context, arg AddRoleParams) error
 	CheckBlogId(ctx context.Context, id int32) (bool, error)
-	CreateAuthor(ctx context.Context, arg CreateAuthorParams) (int32, error)
+	CreateAuthor(ctx context.Context, arg CreateAuthorParams) (CreateAuthorRow, error)
 	CreateBlog(ctx context.Context, arg CreateBlogParams) (int32, error)
 	CreatePress(ctx context.Context, arg CreatePressParams) (int32, error)
 	FeatureBlog(ctx context.Context, id int32) error
+	FeaturePress(ctx context.Context, id int32) error
 	GetAllBlogs(ctx context.Context, arg GetAllBlogsParams) ([]GetAllBlogsRow, error)
+	GetAllPresses(ctx context.Context) ([]GetAllPressesRow, error)
+	GetAuthorByUsernameAndPassword(ctx context.Context, arg GetAuthorByUsernameAndPasswordParams) (Author, error)
 	GetAuthors(ctx context.Context) ([]Author, error)
 	GetBlogById(ctx context.Context, id int32) (GetBlogByIdRow, error)
 	GetBlogByTitleSlug(ctx context.Context, title string) (GetBlogByTitleSlugRow, error)
@@ -26,8 +29,12 @@ type Querier interface {
 	GetPressInCategory(ctx context.Context, arg GetPressInCategoryParams) ([]Press, error)
 	GetPresses(ctx context.Context, arg GetPressesParams) ([]GetPressesRow, error)
 	GetRealatedBlogsById(ctx context.Context, arg GetRealatedBlogsByIdParams) ([]GetRealatedBlogsByIdRow, error)
+	PublishBlog(ctx context.Context, arg PublishBlogParams) error
+	PublishPress(ctx context.Context, arg PublishPressParams) error
 	// Ensure role isn't already present
 	RemoveRole(ctx context.Context, arg RemoveRoleParams) error
+	SoftDeleteBlog(ctx context.Context, id int32) error
+	SoftDeletePress(ctx context.Context, id int32) error
 	UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error
 }
 
