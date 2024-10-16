@@ -76,6 +76,66 @@ func (q *Queries) FeatureBlog(ctx context.Context, id int32) error {
 	return err
 }
 
+const getAllBlogs = `-- name: GetAllBlogs :many
+SELECT 
+    b.id AS blog_id,
+    b.title,
+    b.thumbnail_s3_path AS blog_thumbnail_url,
+    b.category,
+    b.description,
+    b.read_time,
+    b.created_at AS blog_created_at
+FROM
+    blogs b
+ORDER BY 
+    b.created_at DESC
+LIMIT 
+    $1 OFFSET $2
+`
+
+type GetAllBlogsParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+type GetAllBlogsRow struct {
+	BlogID           int32            `json:"blog_id"`
+	Title            string           `json:"title"`
+	BlogThumbnailUrl string           `json:"blog_thumbnail_url"`
+	Category         []string         `json:"category"`
+	Description      string           `json:"description"`
+	ReadTime         int32            `json:"read_time"`
+	BlogCreatedAt    pgtype.Timestamp `json:"blog_created_at"`
+}
+
+func (q *Queries) GetAllBlogs(ctx context.Context, arg GetAllBlogsParams) ([]GetAllBlogsRow, error) {
+	rows, err := q.db.Query(ctx, getAllBlogs, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetAllBlogsRow{}
+	for rows.Next() {
+		var i GetAllBlogsRow
+		if err := rows.Scan(
+			&i.BlogID,
+			&i.Title,
+			&i.BlogThumbnailUrl,
+			&i.Category,
+			&i.Description,
+			&i.ReadTime,
+			&i.BlogCreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getBlogById = `-- name: GetBlogById :one
 SELECT 
     b.id AS blog_id,
@@ -229,6 +289,7 @@ SELECT
     b.read_time,
     b.created_at AS blog_created_at,
     a.name AS author_name,
+    b.is_featured as is_featured,
     a.thumbnail_s3_path AS author_profile_url
 FROM 
     blogs b
@@ -254,6 +315,7 @@ type GetBlogsRow struct {
 	ReadTime         int32            `json:"read_time"`
 	BlogCreatedAt    pgtype.Timestamp `json:"blog_created_at"`
 	AuthorName       string           `json:"author_name"`
+	IsFeatured       bool             `json:"is_featured"`
 	AuthorProfileUrl string           `json:"author_profile_url"`
 }
 
@@ -275,6 +337,7 @@ func (q *Queries) GetBlogs(ctx context.Context, arg GetBlogsParams) ([]GetBlogsR
 			&i.ReadTime,
 			&i.BlogCreatedAt,
 			&i.AuthorName,
+			&i.IsFeatured,
 			&i.AuthorProfileUrl,
 		); err != nil {
 			return nil, err

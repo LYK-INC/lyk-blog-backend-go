@@ -15,6 +15,8 @@ type Querier interface {
 	CreateBlog(ctx context.Context, arg CreateBlogParams) (int32, error)
 	CreatePress(ctx context.Context, arg CreatePressParams) (int32, error)
 	FeatureBlog(ctx context.Context, id int32) error
+	GetAllBlogs(ctx context.Context, arg GetAllBlogsParams) ([]GetAllBlogsRow, error)
+	GetAuthors(ctx context.Context) ([]Author, error)
 	GetBlogById(ctx context.Context, id int32) (GetBlogByIdRow, error)
 	GetBlogByTitleSlug(ctx context.Context, title string) (GetBlogByTitleSlugRow, error)
 	GetBlogInCategory(ctx context.Context, arg GetBlogInCategoryParams) ([]Blog, error)

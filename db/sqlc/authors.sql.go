@@ -51,6 +51,37 @@ func (q *Queries) CreateAuthor(ctx context.Context, arg CreateAuthorParams) (int
 	return id, err
 }
 
+const getAuthors = `-- name: GetAuthors :many
+SELECT id, name, password_hash, role, thumbnail_s3_path, created_at FROM authors
+`
+
+func (q *Queries) GetAuthors(ctx context.Context) ([]Author, error) {
+	rows, err := q.db.Query(ctx, getAuthors)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Author{}
+	for rows.Next() {
+		var i Author
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.PasswordHash,
+			&i.Role,
+			&i.ThumbnailS3Path,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const removeRole = `-- name: RemoveRole :exec
 
 UPDATE authors

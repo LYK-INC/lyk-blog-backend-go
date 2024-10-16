@@ -18,3 +18,6 @@ WHERE id = $1
 UPDATE authors
 SET role = array_remove(role, sqlc.arg(role)::TEXT)
 WHERE id = $1;
+
+-- name: GetAuthors :many
+SELECT * FROM authors;

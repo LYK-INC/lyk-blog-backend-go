@@ -59,3 +59,12 @@ func (s *AdminPageService) GetBlogPage(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, blog)
 }
+
+func (s *AdminPageService) GetAllAuthors(c echo.Context) error {
+	authors, err := s.Queries.GetAuthors(c.Request().Context())
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to retrieve authors"})
+	}
+
+	return c.JSON(http.StatusOK, authors)
+}

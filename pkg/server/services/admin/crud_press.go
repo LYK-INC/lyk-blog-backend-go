@@ -31,3 +31,17 @@ func (s *AdminPageService) GetAllPresses(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, presses)
 }
+
+func (s *AdminPageService) CreateNewAuthor(c echo.Context) error {
+	var req db.CreateAuthorParams
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid request"})
+	}
+
+	blog, err := s.Queries.CreateAuthor(c.Request().Context(), req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to create author"})
+	}
+
+	return c.JSON(http.StatusOK, blog)
+}

@@ -99,6 +99,21 @@ ORDER BY
 LIMIT 
     $1 OFFSET $2;
 
+-- name: GetAllBlogs :many
+SELECT 
+    b.id AS blog_id,
+    b.title,
+    b.thumbnail_s3_path AS blog_thumbnail_url,
+    b.category,
+    b.description,
+    b.read_time,
+    b.created_at AS blog_created_at
+FROM
+    blogs b
+ORDER BY 
+    b.created_at DESC
+LIMIT 
+    $1 OFFSET $2;
 
 -- name: GetRealatedBlogsById :many
 SELECT  

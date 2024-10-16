@@ -30,6 +30,8 @@ func initRoutes(r *echo.Echo, s *Services, l *zerolog.Logger) {
 	a := r.Group("/admin")
 	a.POST("/create-blog", s.AdminService.CreateBlogPage)
 	a.POST("/create-press", s.AdminService.CreatePressPage)
+	a.POST("/create-author", s.AdminService.CreateNewAuthor)
 	a.GET("/get-press", s.AdminService.GetAllPresses)
+	a.GET("/get-authors", s.AdminService.GetAllAuthors)
 	a.GET("/get-blog/:limit/:offset", s.AdminService.GetBlogPage)
 }
