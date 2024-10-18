@@ -21,15 +21,14 @@ func responsePressFmt(d []db.GetPressesRow) []types.Press {
 	// Loop through the db.GetPressesRow slice and map it to Blog
 	for i, b := range d {
 		formattedResponse[i] = types.Press{
-			PressID:                 b.PressID,
-			PublisherName:           b.PublisherName,
-			PublisherProfileImgLink: b.PublisherProfileImgLink,
-			PressThumbnailUrl:       b.PressThumbnailUrl,
-			Description:             b.Description,
-			Title:                   b.Title,
-			ExternalUrl:             b.ExternalUrl,
-			Category:                b.Category,
-			PressPublishedAt:        b.PressPublishedAt.Time,
+			PressID:           b.PressID,
+			AuthorName:        b.AuthorName,
+			PressThumbnailUrl: b.PressThumbnailUrl,
+			Description:       b.Description,
+			Title:             b.Title,
+			ExternalUrl:       b.ExternalUrl,
+			Category:          b.Category,
+			PressPublishedAt:  b.PressPublishedAt.Time,
 		}
 	}
 

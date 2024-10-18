@@ -4,6 +4,7 @@ import "time"
 
 type Press struct {
 	PressID                 int32     `json:"press_id"`
+	AuthorName              string    `json:"author_name"`
 	PublisherName           string    `json:"publisher_name"`
 	PublisherProfileImgLink string    `json:"publisher_profile_img_link"`
 	PressThumbnailUrl       string    `json:"press_thumbnail_url"`

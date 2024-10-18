@@ -1,14 +1,12 @@
 -- name: CreatePress :one
 INSERT INTO press 
-    (publisher_name, 
-    publisher_profile_img_link, 
+    (author_id,
     thumbnail_s3_path, 
     description, 
     title, 
     external_url, 
-    category, 
-    published_at)
-VALUES ($1, $2, $3, $4, $5, $6, sqlc.arg(category)::TEXT[], $7)
+    category)
+VALUES ($1, $2, $3, $4, $5, sqlc.arg(category)::TEXT[])
 RETURNING id;
 
 -- name: GetPressById :one
@@ -28,8 +26,7 @@ LIMIT $2 OFFSET $3;
 -- name: GetPresses :many
 SELECT 
     p.id AS press_id,
-    p.publisher_name,
-    p.publisher_profile_img_link,
+    a.name AS author_name,
     p.thumbnail_s3_path AS press_thumbnail_url,
     p.description,
     p.title,
@@ -37,9 +34,12 @@ SELECT
     p.category,
     p.is_featured,
     p.is_published,
+    p.created_at AS press_created_at,
     p.published_at AS press_published_at
 FROM 
     press p
+JOIN
+    authors a ON p.author_id = a.id
 WHERE
     p.is_deleted = FALSE
 ORDER BY 
@@ -50,8 +50,7 @@ LIMIT
 -- name: GetAllPresses :many
 SELECT 
     p.id AS press_id,
-    p.publisher_name,
-    p.publisher_profile_img_link,
+    a.name AS author_name,
     p.thumbnail_s3_path AS press_thumbnail_url,
     p.description,
     p.title,
@@ -59,9 +58,12 @@ SELECT
     p.category,
     p.is_featured,
     p.is_published,
+    p.created_at AS press_created_at,
     p.published_at AS press_published_at
 FROM 
     press p
+JOIN
+    authors a ON p.author_id = a.id
 WHERE
     p.is_deleted = FALSE
 ORDER BY 
@@ -75,7 +77,11 @@ WHERE id = $1;
 
 -- name: PublishPress :exec
 UPDATE press
-SET is_published = $2
+SET is_published = $2,
+    published_at = CASE
+        WHEN $2 = true THEN NOW()
+        ELSE published_at
+    END
 WHERE id = $1;
 
 -- name: FeaturePress :exec

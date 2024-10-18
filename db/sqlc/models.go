@@ -34,17 +34,16 @@ type Blog struct {
 }
 
 type Press struct {
-	ID                      int32            `json:"id"`
-	PublisherName           string           `json:"publisher_name"`
-	PublisherProfileImgLink string           `json:"publisher_profile_img_link"`
-	ThumbnailS3Path         string           `json:"thumbnail_s3_path"`
-	Description             string           `json:"description"`
-	Title                   string           `json:"title"`
-	IsDeleted               bool             `json:"is_deleted"`
-	IsPublished             bool             `json:"is_published"`
-	IsFeatured              bool             `json:"is_featured"`
-	ExternalUrl             string           `json:"external_url"`
-	Category                []string         `json:"category"`
-	PublishedAt             pgtype.Timestamp `json:"published_at"`
-	CreatedAt               pgtype.Timestamp `json:"created_at"`
+	ID              int32            `json:"id"`
+	AuthorID        int32            `json:"author_id"`
+	ThumbnailS3Path string           `json:"thumbnail_s3_path"`
+	Description     string           `json:"description"`
+	Title           string           `json:"title"`
+	IsDeleted       bool             `json:"is_deleted"`
+	IsPublished     bool             `json:"is_published"`
+	IsFeatured      bool             `json:"is_featured"`
+	ExternalUrl     string           `json:"external_url"`
+	Category        []string         `json:"category"`
+	PublishedAt     pgtype.Timestamp `json:"published_at"`
+	CreatedAt       pgtype.Timestamp `json:"created_at"`
 }

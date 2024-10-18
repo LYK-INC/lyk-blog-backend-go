@@ -13,38 +13,32 @@ import (
 
 const createPress = `-- name: CreatePress :one
 INSERT INTO press 
-    (publisher_name, 
-    publisher_profile_img_link, 
+    (author_id,
     thumbnail_s3_path, 
     description, 
     title, 
     external_url, 
-    category, 
-    published_at)
-VALUES ($1, $2, $3, $4, $5, $6, $8::TEXT[], $7)
+    category)
+VALUES ($1, $2, $3, $4, $5, $6::TEXT[])
 RETURNING id
 `
 
 type CreatePressParams struct {
-	PublisherName           string           `json:"publisher_name"`
-	PublisherProfileImgLink string           `json:"publisher_profile_img_link"`
-	ThumbnailS3Path         string           `json:"thumbnail_s3_path"`
-	Description             string           `json:"description"`
-	Title                   string           `json:"title"`
-	ExternalUrl             string           `json:"external_url"`
-	PublishedAt             pgtype.Timestamp `json:"published_at"`
-	Category                []string         `json:"category"`
+	AuthorID        int32    `json:"author_id"`
+	ThumbnailS3Path string   `json:"thumbnail_s3_path"`
+	Description     string   `json:"description"`
+	Title           string   `json:"title"`
+	ExternalUrl     string   `json:"external_url"`
+	Category        []string `json:"category"`
 }
 
 func (q *Queries) CreatePress(ctx context.Context, arg CreatePressParams) (int32, error) {
 	row := q.db.QueryRow(ctx, createPress,
-		arg.PublisherName,
-		arg.PublisherProfileImgLink,
+		arg.AuthorID,
 		arg.ThumbnailS3Path,
 		arg.Description,
 		arg.Title,
 		arg.ExternalUrl,
-		arg.PublishedAt,
 		arg.Category,
 	)
 	var id int32
@@ -68,8 +62,7 @@ func (q *Queries) FeaturePress(ctx context.Context, id int32) error {
 const getAllPresses = `-- name: GetAllPresses :many
 SELECT 
     p.id AS press_id,
-    p.publisher_name,
-    p.publisher_profile_img_link,
+    a.name AS author_name,
     p.thumbnail_s3_path AS press_thumbnail_url,
     p.description,
     p.title,
@@ -77,9 +70,12 @@ SELECT
     p.category,
     p.is_featured,
     p.is_published,
+    p.created_at AS press_created_at,
     p.published_at AS press_published_at
 FROM 
     press p
+JOIN
+    authors a ON p.author_id = a.id
 WHERE
     p.is_deleted = FALSE
 ORDER BY 
@@ -87,17 +83,17 @@ ORDER BY
 `
 
 type GetAllPressesRow struct {
-	PressID                 int32            `json:"press_id"`
-	PublisherName           string           `json:"publisher_name"`
-	PublisherProfileImgLink string           `json:"publisher_profile_img_link"`
-	PressThumbnailUrl       string           `json:"press_thumbnail_url"`
-	Description             string           `json:"description"`
-	Title                   string           `json:"title"`
-	ExternalUrl             string           `json:"external_url"`
-	Category                []string         `json:"category"`
-	IsFeatured              bool             `json:"is_featured"`
-	IsPublished             bool             `json:"is_published"`
-	PressPublishedAt        pgtype.Timestamp `json:"press_published_at"`
+	PressID           int32            `json:"press_id"`
+	AuthorName        string           `json:"author_name"`
+	PressThumbnailUrl string           `json:"press_thumbnail_url"`
+	Description       string           `json:"description"`
+	Title             string           `json:"title"`
+	ExternalUrl       string           `json:"external_url"`
+	Category          []string         `json:"category"`
+	IsFeatured        bool             `json:"is_featured"`
+	IsPublished       bool             `json:"is_published"`
+	PressCreatedAt    pgtype.Timestamp `json:"press_created_at"`
+	PressPublishedAt  pgtype.Timestamp `json:"press_published_at"`
 }
 
 func (q *Queries) GetAllPresses(ctx context.Context) ([]GetAllPressesRow, error) {
@@ -111,8 +107,7 @@ func (q *Queries) GetAllPresses(ctx context.Context) ([]GetAllPressesRow, error)
 		var i GetAllPressesRow
 		if err := rows.Scan(
 			&i.PressID,
-			&i.PublisherName,
-			&i.PublisherProfileImgLink,
+			&i.AuthorName,
 			&i.PressThumbnailUrl,
 			&i.Description,
 			&i.Title,
@@ -120,6 +115,7 @@ func (q *Queries) GetAllPresses(ctx context.Context) ([]GetAllPressesRow, error)
 			&i.Category,
 			&i.IsFeatured,
 			&i.IsPublished,
+			&i.PressCreatedAt,
 			&i.PressPublishedAt,
 		); err != nil {
 			return nil, err
@@ -133,7 +129,7 @@ func (q *Queries) GetAllPresses(ctx context.Context) ([]GetAllPressesRow, error)
 }
 
 const getPressById = `-- name: GetPressById :one
-SELECT id, publisher_name, publisher_profile_img_link, thumbnail_s3_path, description, title, is_deleted, is_published, is_featured, external_url, category, published_at, created_at 
+SELECT id, author_id, thumbnail_s3_path, description, title, is_deleted, is_published, is_featured, external_url, category, published_at, created_at 
 FROM press
 WHERE id = $1 AND is_deleted = FALSE
 `
@@ -143,8 +139,7 @@ func (q *Queries) GetPressById(ctx context.Context, id int32) (Press, error) {
 	var i Press
 	err := row.Scan(
 		&i.ID,
-		&i.PublisherName,
-		&i.PublisherProfileImgLink,
+		&i.AuthorID,
 		&i.ThumbnailS3Path,
 		&i.Description,
 		&i.Title,
@@ -160,7 +155,7 @@ func (q *Queries) GetPressById(ctx context.Context, id int32) (Press, error) {
 }
 
 const getPressInCategory = `-- name: GetPressInCategory :many
-SELECT id, publisher_name, publisher_profile_img_link, thumbnail_s3_path, description, title, is_deleted, is_published, is_featured, external_url, category, published_at, created_at 
+SELECT id, author_id, thumbnail_s3_path, description, title, is_deleted, is_published, is_featured, external_url, category, published_at, created_at 
 FROM press
 WHERE $1 = ANY(category) AND is_deleted = FALSE
 ORDER BY published_at DESC
@@ -184,8 +179,7 @@ func (q *Queries) GetPressInCategory(ctx context.Context, arg GetPressInCategory
 		var i Press
 		if err := rows.Scan(
 			&i.ID,
-			&i.PublisherName,
-			&i.PublisherProfileImgLink,
+			&i.AuthorID,
 			&i.ThumbnailS3Path,
 			&i.Description,
 			&i.Title,
@@ -210,8 +204,7 @@ func (q *Queries) GetPressInCategory(ctx context.Context, arg GetPressInCategory
 const getPresses = `-- name: GetPresses :many
 SELECT 
     p.id AS press_id,
-    p.publisher_name,
-    p.publisher_profile_img_link,
+    a.name AS author_name,
     p.thumbnail_s3_path AS press_thumbnail_url,
     p.description,
     p.title,
@@ -219,9 +212,12 @@ SELECT
     p.category,
     p.is_featured,
     p.is_published,
+    p.created_at AS press_created_at,
     p.published_at AS press_published_at
 FROM 
     press p
+JOIN
+    authors a ON p.author_id = a.id
 WHERE
     p.is_deleted = FALSE
 ORDER BY 
@@ -236,17 +232,17 @@ type GetPressesParams struct {
 }
 
 type GetPressesRow struct {
-	PressID                 int32            `json:"press_id"`
-	PublisherName           string           `json:"publisher_name"`
-	PublisherProfileImgLink string           `json:"publisher_profile_img_link"`
-	PressThumbnailUrl       string           `json:"press_thumbnail_url"`
-	Description             string           `json:"description"`
-	Title                   string           `json:"title"`
-	ExternalUrl             string           `json:"external_url"`
-	Category                []string         `json:"category"`
-	IsFeatured              bool             `json:"is_featured"`
-	IsPublished             bool             `json:"is_published"`
-	PressPublishedAt        pgtype.Timestamp `json:"press_published_at"`
+	PressID           int32            `json:"press_id"`
+	AuthorName        string           `json:"author_name"`
+	PressThumbnailUrl string           `json:"press_thumbnail_url"`
+	Description       string           `json:"description"`
+	Title             string           `json:"title"`
+	ExternalUrl       string           `json:"external_url"`
+	Category          []string         `json:"category"`
+	IsFeatured        bool             `json:"is_featured"`
+	IsPublished       bool             `json:"is_published"`
+	PressCreatedAt    pgtype.Timestamp `json:"press_created_at"`
+	PressPublishedAt  pgtype.Timestamp `json:"press_published_at"`
 }
 
 func (q *Queries) GetPresses(ctx context.Context, arg GetPressesParams) ([]GetPressesRow, error) {
@@ -260,8 +256,7 @@ func (q *Queries) GetPresses(ctx context.Context, arg GetPressesParams) ([]GetPr
 		var i GetPressesRow
 		if err := rows.Scan(
 			&i.PressID,
-			&i.PublisherName,
-			&i.PublisherProfileImgLink,
+			&i.AuthorName,
 			&i.PressThumbnailUrl,
 			&i.Description,
 			&i.Title,
@@ -269,6 +264,7 @@ func (q *Queries) GetPresses(ctx context.Context, arg GetPressesParams) ([]GetPr
 			&i.Category,
 			&i.IsFeatured,
 			&i.IsPublished,
+			&i.PressCreatedAt,
 			&i.PressPublishedAt,
 		); err != nil {
 			return nil, err
@@ -283,7 +279,11 @@ func (q *Queries) GetPresses(ctx context.Context, arg GetPressesParams) ([]GetPr
 
 const publishPress = `-- name: PublishPress :exec
 UPDATE press
-SET is_published = $2
+SET is_published = $2,
+    published_at = CASE
+        WHEN $2 = true THEN NOW()
+        ELSE published_at
+    END
 WHERE id = $1
 `
 
